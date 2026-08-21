@@ -28,6 +28,9 @@ public class EmailAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "tenant_id", length = 64)
+    private String tenantId;
+
     @Column(name = "client_code", nullable = false, length = 64)
     private String clientCode;
 
@@ -265,5 +268,9 @@ public class EmailAccount {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public String getTenantId() {
+        return tenantId;
     }
 }

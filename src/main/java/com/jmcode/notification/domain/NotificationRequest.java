@@ -8,6 +8,8 @@ public record NotificationRequest(
         String subject,
         String message,
         String clientCode,
-        Map<String, String> metadata
+        Map<String, String> metadata,
+        String templateName,
+        java.util.Map<String, String> variables
 ) {
 }
