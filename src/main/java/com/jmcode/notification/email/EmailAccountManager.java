@@ -12,6 +12,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EmailAccountManager {
 
     private final Map<String, JavaMailSender> senderCache = new ConcurrentHashMap<>();
+    private final PasswordEncryptor passwordEncryptor;
+
+    public EmailAccountManager(PasswordEncryptor passwordEncryptor) {
+        this.passwordEncryptor = passwordEncryptor;
+    }
 
     public JavaMailSender getSender(EmailAccount account) {
         String cacheKey = account.getClientCode() + "_" + account.getUpdatedAt().toEpochMilli();
@@ -23,7 +28,7 @@ public class EmailAccountManager {
         sender.setHost(account.getHost());
         sender.setPort(account.getPort());
         sender.setUsername(account.getUsername());
-        sender.setPassword(account.getPassword());
+        sender.setPassword(passwordEncryptor.decrypt(account.getPassword()));
         sender.setProtocol(account.getProtocol());
         sender.setDefaultEncoding("UTF-8");
 

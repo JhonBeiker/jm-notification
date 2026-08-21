@@ -12,9 +12,11 @@ import java.util.List;
 public class EmailAccountService implements CommandLineRunner {
 
     private final EmailAccountRepository repository;
+    private final PasswordEncryptor passwordEncryptor;
 
-    public EmailAccountService(EmailAccountRepository repository) {
+    public EmailAccountService(EmailAccountRepository repository, PasswordEncryptor passwordEncryptor) {
         this.repository = repository;
+        this.passwordEncryptor = passwordEncryptor;
     }
 
     @Override
@@ -27,7 +29,7 @@ public class EmailAccountService implements CommandLineRunner {
             account.setHost("smtp.gmail.com");
             account.setPort(587);
             account.setUsername("");
-            account.setPassword("");
+            account.setPassword(passwordEncryptor.encrypt(""));
             account.setFromAddress("");
             account.setFromName("System Notifications");
             account.setAuth(true);
@@ -65,6 +67,7 @@ public class EmailAccountService implements CommandLineRunner {
         if (account.getId() == null && repository.existsByClientCodeIgnoreCase(account.getClientCode())) {
             throw new IllegalArgumentException("Email account already exists for clientCode: " + account.getClientCode());
         }
+        account.setPassword(passwordEncryptor.encrypt(account.getPassword()));
         if (account.isDefault()) {
             repository.findByIsDefaultTrueAndActiveTrue().ifPresent(existing -> {
                 if (!existing.getId().equals(account.getId())) {
