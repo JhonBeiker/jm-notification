@@ -6,6 +6,8 @@ import com.jmcode.notification.domain.NotificationResult;
 import com.jmcode.notification.email.EmailAccount;
 import com.jmcode.notification.email.EmailAccountManager;
 import com.jmcode.notification.email.EmailAccountService;
+import com.jmcode.notification.email.EmailTemplate;
+import com.jmcode.notification.email.EmailTemplateRepository;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
@@ -22,10 +24,12 @@ public class EmailNotificationChannel implements NotificationChannel {
 
     private final EmailAccountService accountService;
     private final EmailAccountManager accountManager;
+    private final EmailTemplateRepository templateRepository;
 
-    public EmailNotificationChannel(EmailAccountService accountService, EmailAccountManager accountManager) {
+    public EmailNotificationChannel(EmailAccountService accountService, EmailAccountManager accountManager, EmailTemplateRepository templateRepository) {
         this.accountService = accountService;
         this.accountManager = accountManager;
+        this.templateRepository = templateRepository;
     }
 
     @Override
@@ -45,6 +49,24 @@ public class EmailNotificationChannel implements NotificationChannel {
             EmailAccount account = accountService.resolveAccount(clientCode);
             JavaMailSender mailSender = accountManager.getSender(account);
 
+            // Obtener template si se especifica
+            String finalSubject = request.subject();
+            String finalMessage = request.message();
+            boolean isHtml = false;
+
+            if (request.templateName() != null) {
+                EmailTemplate template = templateRepository.findByTenantIdAndName(account.getTenantId(), request.templateName())
+                        .orElseThrow(() -> new RuntimeException("Template not found: " + request.templateName()));
+
+                if (template.isActive()) {
+                    finalSubject = renderTemplate(template.getSubject(), request.variables());
+                    finalMessage = renderTemplate(template.getContent(), request.variables());
+                    isHtml = "html".equalsIgnoreCase(template.getContentType());
+                }
+            } else {
+                isHtml = isHtmlContent(finalMessage);
+            }
+
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
@@ -62,18 +84,43 @@ public class EmailNotificationChannel implements NotificationChannel {
             }
 
             helper.setTo(request.to());
-            helper.setSubject(StringUtils.hasText(request.subject()) ? request.subject() : "Notification");
+            helper.setSubject(finalSubject);
 
-            boolean isHtml = request.message() != null && (request.message().contains("<html>") || request.message().contains("<p>"));
-            helper.setText(request.message(), isHtml);
+            helper.setText(finalMessage, isHtml);
 
             mailSender.send(mimeMessage);
-            log.info("Email sent to {} using clientCode={}", request.to(), account.getClientCode());
+            log.info("Email sent to {} using clientCode={} template={}", request.to(), account.getClientCode(), request.templateName());
             return NotificationResult.sent(supports(), request.to(), "email-" + account.getClientCode() + "-" + System.currentTimeMillis());
         } catch (Exception ex) {
             log.error("Failed to send email to {}: {}", request.to(), ex.getMessage());
             return NotificationResult.failed(supports(), request.to(), ex.getMessage());
         }
+    }
+
+    private String renderTemplate(String template, java.util.Map<String, String> variables) {
+        if (template == null || variables == null || variables.isEmpty()) {
+            return template;
+        }
+        String result = template;
+        for (java.util.Map.Entry<String, String> entry : variables.entrySet()) {
+            String placeholder = "{{" + entry.getKey() + "}}";
+            result = result.replace(placeholder, entry.getValue());
+        }
+        return result;
+    }
+
+    private boolean isHtmlContent(String content) {
+        if (content == null || content.isEmpty()) {
+            return false;
+        }
+        String lower = content.toLowerCase();
+        return lower.contains("<html") || lower.contains("<p>") || lower.contains("<h1>")
+                || lower.contains("<h2>") || lower.contains("<h3>") || lower.contains("<div>")
+                || lower.contains("<span>") || lower.contains("<table>") || lower.contains("<br>")
+                || lower.contains("<b>") || lower.contains("<i>") || lower.contains("<u>")
+                || lower.contains("<strong>") || lower.contains("<em>") || lower.contains("<a ")
+                || lower.contains("<img") || lower.contains("<ul>") || lower.contains("<ol>")
+                || lower.contains("<li>") || lower.contains("<!doctype");
     }
 
     private static String resolveClientCode(NotificationRequest request) {

@@ -81,7 +81,7 @@ public class WhatsAppNotificationChannel implements NotificationChannel {
             return null;
         }
         Object messages = response.get("messages");
-        if (messages instanceof List<?> list && !list.isEmpty() && list.getFirst() instanceof Map<?, ?> first) {
+        if (messages instanceof List<?> list && !list.isEmpty() && !list.isEmpty() && list.get(0) instanceof Map<?, ?> first) {
             Object id = first.get("id");
             return id != null ? id.toString() : null;
         }

@@ -3,7 +3,6 @@ package com.jmcode.notification.web.dto;
 import com.jmcode.notification.domain.ChannelType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Map;
 
 public record NotificationRequestDto(
@@ -12,6 +11,8 @@ public record NotificationRequestDto(
         String subject,
         @NotBlank String message,
         String clientCode,
-        Map<String, String> metadata
+        Map<String, String> metadata,
+        String templateName,
+        Map<String, String> variables
 ) {
 }

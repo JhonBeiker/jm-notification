@@ -73,7 +73,9 @@ public class NotificationService {
                 dto.subject(),
                 dto.message(),
                 dto.clientCode(),
-                dto.metadata()
+                dto.metadata(),
+                dto.templateName(),
+                dto.variables()
         );
     }
 }
