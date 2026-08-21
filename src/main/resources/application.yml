@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: jm-notification
+  datasource:
+    url: ${DB_URL:jdbc:h2:file:./data/jm-notification;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE}
+    driver-class-name: org.h2.Driver
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+  h2:
+    console:
+      enabled: ${H2_CONSOLE_ENABLED:true}
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            checkserveridentity: false
+            trust: ${MAIL_HOST:*} # Trusts the host passed in the environment variable, or use "*" to trust all
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+notification:
+  email:
+    enabled: ${NOTIFICATION_EMAIL_ENABLED:true}
+    from: ${MAIL_FROM:${MAIL_USERNAME:}}
+  whatsapp:
+    enabled: ${NOTIFICATION_WHATSAPP_ENABLED:false}
+    api-url: ${WHATSAPP_API_URL:https://graph.facebook.com/v21.0}
+    phone-number-id: ${WHATSAPP_PHONE_NUMBER_ID:}
+    access-token: ${WHATSAPP_ACCESS_TOKEN:}
+  telegram:
+    enabled: ${NOTIFICATION_TELEGRAM_ENABLED:false}
+    bot-token: ${TELEGRAM_BOT_TOKEN:}
+    api-url: ${TELEGRAM_API_URL:https://api.telegram.org}
+    webhook-secret: ${TELEGRAM_WEBHOOK_SECRET:}
+    webhook-url: ${TELEGRAM_WEBHOOK_URL:}
+    webhook-auto-register: ${TELEGRAM_WEBHOOK_AUTO_REGISTER:false}
+    require-active-subscriber: ${TELEGRAM_REQUIRE_ACTIVE_SUBSCRIBER:true}
+    welcome-message: ${TELEGRAM_WELCOME_MESSAGE:Suscripcion activa. Ya puedes recibir notificaciones.}
+    goodbye-message: ${TELEGRAM_GOODBYE_MESSAGE:Suscripcion cancelada. Usa /start para volver a activarla.}
