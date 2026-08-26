@@ -1,6 +1,5 @@
 package com.jmcode.notification.telegram;
 
-import com.jmcode.notification.config.NotificationProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,34 +18,30 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@org.mockito.junit.jupiter.MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 class TelegramSubscriberServiceTest {
 
     @Mock
     private TelegramSubscriberRepository repository;
 
     @Mock
+    private TelegramBotAccountManager accountManager;
+
+    @Mock
     private TelegramBotClient botClient;
+
+    @Mock
+    private TelegramBotAccount account;
 
     private TelegramSubscriberService service;
 
     @BeforeEach
     void setUp() {
-        NotificationProperties properties = new NotificationProperties(
-                new NotificationProperties.Email(false, null),
-                new NotificationProperties.WhatsApp(false, null, null, null),
-                new NotificationProperties.Telegram(
-                        true,
-                        "123:token",
-                        "https://api.telegram.org",
-                        "",
-                        true,
-                        "welcome",
-                        "goodbye",
-                        "",
-                        false
-                )
-        );
-        service = new TelegramSubscriberService(repository, botClient, properties);
+        when(account.getWelcomeMessage()).thenReturn("welcome");
+        when(account.getGoodbyeMessage()).thenReturn("goodbye");
+        when(accountManager.getClient(account)).thenReturn(botClient);
+        
+        service = new TelegramSubscriberService(repository, accountManager);
     }
 
     @Test
@@ -67,7 +62,7 @@ class TelegramSubscriberServiceTest {
                 null
         );
 
-        service.handleUpdate(update);
+        service.handleUpdate(update, account);
 
         ArgumentCaptor<TelegramSubscriber> captor = ArgumentCaptor.forClass(TelegramSubscriber.class);
         verify(repository).save(captor.capture());
@@ -99,7 +94,7 @@ class TelegramSubscriberServiceTest {
                 null
         );
 
-        service.handleUpdate(update);
+        service.handleUpdate(update, account);
 
         assertFalse(existing.isActive());
         verify(botClient).sendText(eq(42L), eq("goodbye"));

@@ -1,6 +1,6 @@
 package com.jmcode.notification.telegram;
 
-import com.jmcode.notification.config.NotificationProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -8,62 +8,71 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class TelegramWebhookService {
 
     private static final String WEBHOOK_PATH = "/api/v1/telegram/webhook";
 
-    private final TelegramBotClient botClient;
-    private final NotificationProperties.Telegram properties;
+    private final TelegramBotAccountService accountService;
+    private final TelegramBotAccountManager accountManager;
 
-    public TelegramWebhookService(TelegramBotClient botClient, NotificationProperties properties) {
-        this.botClient = botClient;
-        this.properties = properties.telegram();
-    }
+    public Map<String, Object> register(String publicBaseUrl, String clientCode) {
+        TelegramBotAccount account = accountService.resolveAccount(clientCode);
+        String webhookUrl = resolveWebhookUrl(account, publicBaseUrl);
+        requireHttps(webhookUrl);
 
-    public Map<String, Object> register(String publicBaseUrl) {
-        String webhookUrl = resolveWebhookUrl(publicBaseUrl);
-        Map<String, Object> telegramResponse = botClient.setWebhook(webhookUrl, properties.webhookSecret());
+        Map<String, Object> telegramResponse = accountManager.getClient(account)
+                .setWebhook(webhookUrl, account.getWebhookSecret());
 
         Map<String, Object> result = new LinkedHashMap<>();
+        result.put("clientCode", account.getClientCode());
         result.put("webhookUrl", webhookUrl);
-        result.put("secretConfigured", StringUtils.hasText(properties.webhookSecret()));
+        result.put("secretConfigured", StringUtils.hasText(account.getWebhookSecret()));
         result.put("telegram", telegramResponse);
         return result;
     }
 
-    public Map<String, Object> unregister() {
-        Map<String, Object> telegramResponse = botClient.deleteWebhook();
-        return Map.of("telegram", telegramResponse);
+    public Map<String, Object> unregister(String clientCode) {
+        TelegramBotAccount account = accountService.resolveAccount(clientCode);
+        Map<String, Object> telegramResponse = accountManager.getClient(account).deleteWebhook();
+        return Map.of("clientCode", account.getClientCode(), "telegram", telegramResponse);
     }
 
-    public Map<String, Object> info() {
-        Map<String, Object> telegramResponse = botClient.getWebhookInfo();
+    public Map<String, Object> info(String clientCode) {
+        TelegramBotAccount account = accountService.resolveAccount(clientCode);
+        Map<String, Object> telegramResponse = accountManager.getClient(account).getWebhookInfo();
+
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("configuredWebhookUrl", properties.webhookUrl());
-        result.put("autoRegister", properties.webhookAutoRegister());
-        result.put("secretConfigured", StringUtils.hasText(properties.webhookSecret()));
+        result.put("clientCode", account.getClientCode());
+        result.put("configuredWebhookUrl", account.getWebhookUrl());
+        result.put("autoRegister", account.isWebhookAutoRegister());
+        result.put("secretConfigured", StringUtils.hasText(account.getWebhookSecret()));
         result.put("telegram", telegramResponse);
         return result;
     }
 
-    public Map<String, Object> botInfo() {
-        return botClient.getMe();
+    public Map<String, Object> botInfo(String clientCode) {
+        TelegramBotAccount account = accountService.resolveAccount(clientCode);
+        return accountManager.getClient(account).getMe();
     }
 
-    private String resolveWebhookUrl(String publicBaseUrl) {
+    private static String resolveWebhookUrl(TelegramBotAccount account, String publicBaseUrl) {
         if (StringUtils.hasText(publicBaseUrl)) {
             return join(publicBaseUrl.trim(), WEBHOOK_PATH);
         }
-        if (StringUtils.hasText(properties.webhookUrl())) {
-            String configured = properties.webhookUrl().trim();
-            if (configured.endsWith(WEBHOOK_PATH)) {
-                return configured;
-            }
-            return join(configured, WEBHOOK_PATH);
+        if (StringUtils.hasText(account.getWebhookUrl())) {
+            String configured = account.getWebhookUrl().trim();
+            return configured.endsWith(WEBHOOK_PATH) ? configured : join(configured, WEBHOOK_PATH);
         }
         throw new IllegalArgumentException(
-                "Webhook URL required. Pass publicBaseUrl in the request body or set TELEGRAM_WEBHOOK_URL"
-        );
+                "Webhook URL required. Pass publicBaseUrl in the request body or set webhookUrl in the bot account");
+    }
+
+    /** Telegram rechaza webhooks que no sean HTTPS: se avisa antes de la llamada remota. */
+    private static void requireHttps(String webhookUrl) {
+        if (!webhookUrl.startsWith("https://")) {
+            throw new IllegalArgumentException("Telegram requires an HTTPS webhook URL, got: " + webhookUrl);
+        }
     }
 
     private static String join(String base, String path) {

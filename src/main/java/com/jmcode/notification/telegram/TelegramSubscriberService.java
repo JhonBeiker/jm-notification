@@ -1,7 +1,7 @@
 package com.jmcode.notification.telegram;
 
-import com.jmcode.notification.config.NotificationProperties;
-import com.jmcode.notification.web.error.SubscriberNotFoundException;
+import com.jmcode.notification.common.SubscriberNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,29 +14,21 @@ import java.util.Locale;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TelegramSubscriberService {
 
     private static final Logger log = LoggerFactory.getLogger(TelegramSubscriberService.class);
 
     private final TelegramSubscriberRepository repository;
-    private final TelegramBotClient botClient;
-    private final NotificationProperties.Telegram properties;
-
-    public TelegramSubscriberService(
-            TelegramSubscriberRepository repository,
-            TelegramBotClient botClient,
-            NotificationProperties properties
-    ) {
-        this.repository = repository;
-        this.botClient = botClient;
-        this.properties = properties.telegram();
-    }
+    private final TelegramBotAccountManager accountManager;
 
     @Transactional
-    public void handleUpdate(TelegramUpdatePayload update) {
+    public void handleUpdate(TelegramUpdatePayload update, TelegramBotAccount account) {
         if (update == null) {
             return;
         }
+
+        TelegramBotClient botClient = accountManager.getClient(account);
 
         if (update.myChatMember() != null) {
             handleMembershipChange(update.myChatMember());
@@ -54,13 +46,13 @@ public class TelegramSubscriberService {
 
         if ("/start".equals(command)) {
             TelegramSubscriber subscriber = activate(message, payload);
-            botClient.sendText(subscriber.getChatId(), properties.welcomeMessage());
+            botClient.sendText(subscriber.getChatId(), account.getWelcomeMessage());
             return;
         }
 
         if ("/stop".equals(command) || "/unsubscribe".equals(command)) {
             deactivate(message.chat().id());
-            botClient.sendText(message.chat().id(), properties.goodbyeMessage());
+            botClient.sendText(message.chat().id(), account.getGoodbyeMessage());
             return;
         }
 
@@ -146,11 +138,19 @@ public class TelegramSubscriberService {
     }
 
     @Transactional(readOnly = true)
-    public TelegramSubscriber requireActive(Long chatId) {
-        return findActiveByChatId(chatId)
+    public TelegramSubscriber getByChatId(Long chatId) {
+        return repository.findByChatId(chatId)
+                .orElseThrow(() -> new SubscriberNotFoundException("Subscriber not found for chat_id=" + chatId));
+    }
+
+    /** Vincula un identificador del sistema del cliente a un chat existente. */
+    @Transactional
+    public TelegramSubscriber linkExternalUser(Long chatId, String externalUserId) {
+        TelegramSubscriber subscriber = repository.findByChatId(chatId)
                 .orElseThrow(() -> new SubscriberNotFoundException(
-                        "No active Telegram subscriber for chat_id=" + chatId + ". User must /start the bot first."
-                ));
+                        "Subscriber not found for chat_id=" + chatId + ". User must /start the bot first."));
+        subscriber.setExternalUserId(externalUserId.trim());
+        return repository.save(subscriber);
     }
 
     @Transactional(readOnly = true)

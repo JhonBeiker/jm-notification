@@ -1,6 +1,8 @@
 package com.jmcode.notification.email;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.jmcode.notification.config.NotificationProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -11,8 +13,18 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+/**
+ * Cifra los passwords SMTP guardados en BD con AES-GCM.
+ *
+ * <p>La clave se toma de {@code notification.email.password-encryption-key}
+ * ({@code EMAIL_PASSWORD_ENCRYPTION_KEY}). Si no se configura se genera una aleatoria
+ * en cada arranque, lo que hace <strong>indescifrables</strong> los passwords guardados
+ * en ejecuciones anteriores; por eso se avisa con un WARN muy explícito.
+ */
 @Component
 public class PasswordEncryptor {
+
+    private static final Logger log = LoggerFactory.getLogger(PasswordEncryptor.class);
 
     private static final String PREFIX = "enc:v1:";
     private static final int IV_LENGTH = 12;
@@ -23,8 +35,8 @@ public class PasswordEncryptor {
     private final SecretKey key;
     private final SecureRandom random = new SecureRandom();
 
-    public PasswordEncryptor(@Value("${notification.email.password-encryption-key:}") String configuredKey) {
-        byte[] raw = decodeKey(configuredKey);
+    public PasswordEncryptor(NotificationProperties properties) {
+        byte[] raw = decodeKey(properties.email().passwordEncryptionKey());
         if (raw.length != 16 && raw.length != 24 && raw.length != 32) {
             throw new IllegalStateException(
                     "notification.email.password-encryption-key must decode to 16, 24 or 32 bytes (got " + raw.length + ")");
@@ -33,10 +45,7 @@ public class PasswordEncryptor {
     }
 
     public String encrypt(String plaintext) {
-        if (plaintext == null || plaintext.isEmpty()) {
-            return plaintext;
-        }
-        if (plaintext.startsWith(PREFIX)) {
+        if (plaintext == null || plaintext.isEmpty() || plaintext.startsWith(PREFIX)) {
             return plaintext;
         }
         try {
@@ -55,10 +64,7 @@ public class PasswordEncryptor {
     }
 
     public String decrypt(String stored) {
-        if (stored == null || stored.isEmpty()) {
-            return stored;
-        }
-        if (!stored.startsWith(PREFIX)) {
+        if (stored == null || stored.isEmpty() || !stored.startsWith(PREFIX)) {
             return stored;
         }
         String body = stored.substring(PREFIX.length());
@@ -73,12 +79,22 @@ public class PasswordEncryptor {
             cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(TAG_BITS, iv));
             return new String(cipher.doFinal(ciphertext), StandardCharsets.UTF_8);
         } catch (Exception ex) {
-            throw new IllegalStateException("Failed to decrypt password", ex);
+            throw new IllegalStateException(
+                    "Failed to decrypt SMTP password. Check that EMAIL_PASSWORD_ENCRYPTION_KEY matches the key "
+                            + "used when the account was saved", ex);
         }
+    }
+
+    /** {@code true} si el valor ya está cifrado por este componente. */
+    public boolean isEncrypted(String value) {
+        return value != null && value.startsWith(PREFIX);
     }
 
     private static byte[] decodeKey(String configuredKey) {
         if (configuredKey == null || configuredKey.isBlank()) {
+            log.warn("EMAIL_PASSWORD_ENCRYPTION_KEY is not set: generating a random AES key for this run. "
+                    + "SMTP passwords stored by a previous run will NOT be decryptable. "
+                    + "Set a persistent key with: openssl rand -base64 32");
             byte[] generated = new byte[32];
             new SecureRandom().nextBytes(generated);
             return generated;

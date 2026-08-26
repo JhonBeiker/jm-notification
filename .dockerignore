@@ -1,0 +1,30 @@
+# Secretos: spring-dotenv carga .env del working dir. Nunca dentro de la imagen.
+.env
+.env.local
+.env.*.local
+
+# Build local / IDE / VCS
+target/
+data/
+*.db
+.git
+.gitignore
+.gitattributes
+.idea
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings
+.classpath
+.project
+
+# El build usa la imagen maven, no el wrapper.
+mvnw
+mvnw.cmd
+.mvn/
+
+# Docs
+*.md
+!README.md
+open.json

@@ -36,3 +36,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Dump OpenAPI generado (/v3/api-docs): artefacto, no fuente.
+open.json

@@ -1,58 +1,69 @@
 # AGENTS.md
 
 ## Stack
-- Java 25, Spring Boot 4.1.1 (Spring MVC + Data JPA + Mail + Actuator + Validation).
+- Java 25 (`java.version=25` en el `pom.xml`): con un JDK anterior el build falla con `release version 25 not supported`. Spring Boot 4.1.1.
+- Starters: webmvc, security, data-jpa, mail, validation, actuator, **restclient** (en Boot 4 el `RestClient.Builder` no lo trae el starter web).
 - Maven (wrapper: `mvnw` / `mvnw.cmd`).
-- H2 file DB by default; JPA `ddl-auto: update` (no Flyway/Liquibase).
-- `spring-dotenv` 4.0.0 — env vars auto-loaded from `.env` in repo root.
+- Postgres por defecto; H2 sólo con scope `test`. JPA `ddl-auto: update` (sin Flyway/Liquibase).
+- `spring-dotenv` 4.0.0 — env vars auto-cargadas desde `.env` en la raíz.
+- **Jackson 3** (`tools.jackson.*`) es el mapper de la aplicación. Jackson 2 sólo entra como transitiva de springdoc: no lo uses para databind.
 
 ## Setup
-1. `cp .env.example .env` (PowerShell: `Copy-Item .env.example .env`) and fill secrets. `.env` is gitignored.
-2. Run: `.\mvnw.cmd spring-boot:run` (Linux/macOS: `./mvnw spring-boot:run`).
-3. The wrapper targets a JDK 25. On Windows the README pins `$env:JAVA_HOME="C:\Users\jhonb\.jdks\corretto-25.0.1"` — match your local install or let `mvnw` auto-download.
-4. Swagger UI: `http://localhost:<SERVER_PORT>/swagger-ui.html`. H2 console: `/h2-console` (default port `8080`, current local `.env` uses `8050`).
+1. `cp .env.example .env` (PowerShell: `Copy-Item .env.example .env`) y rellena secretos. `.env` está gitignoreado.
+2. Apunta `JAVA_HOME` a un JDK 25 (p. ej. `C:\Users\jhonb\.jdks\corretto-25.0.1`).
+3. Ejecutar: `.\mvnw.cmd spring-boot:run` (Linux/macOS: `./mvnw spring-boot:run`).
+4. Swagger UI: `http://localhost:<SERVER_PORT>/swagger-ui.html` (puerto por defecto `8050`).
 
 ## Env / config gotchas
-- `application.yml` reads env vars via `${VAR:default}`. Override either by editing `.env` or by setting the OS env var (dotenv is loaded at startup).
-- `DB_URL` is whatever JDBC URL you set; `application.yml` does NOT pin the driver — when switching off H2 you must also override `spring.datasource.driver-class-name` (e.g. `org.postgresql.Driver`). The current local `.env` uses Postgres on `localhost:5433` without setting the driver.
-- Email accounts are stored in DB (`email_accounts` table) keyed by `client_code`. On first boot, if the table is empty, a default SMTP account is seeded from `MAIL_*` env vars.
-- Telegram bot token MUST match `<botId>:<secret>` (from `@BotFather`). `TelegramBotClient.isConfigured()` returns false otherwise and the channel reports disabled.
-- Telegram webhook auto-register only runs when `NOTIFICATION_TELEGRAM_ENABLED=true`, `TELEGRAM_WEBHOOK_AUTO_REGISTER=true`, AND `TELEGRAM_WEBHOOK_URL` is non-empty (`TelegramWebhookRegistrar`). The URL must be HTTPS and reachable from Telegram.
-- Telegram only delivers to active subscribers (those who sent `/start`); blocked/403 responses auto-flip the subscriber to inactive.
+- El driver JDBC se deriva de `DB_URL`; no hay que fijarlo aparte.
+- `EMAIL_PASSWORD_ENCRYPTION_KEY` y `JWT_SECRET`: si están vacíos se genera una clave aleatoria por arranque y se avisa con WARN. En el primer caso los passwords SMTP guardados dejan de ser descifrables; en el segundo los tokens mueren al reiniciar.
+- `JWT_SECRET` debe tener ≥ 32 caracteres o el arranque falla (antes se rellenaba con ceros).
+- Cuentas SMTP y bots de Telegram viven en BD (`email_accounts`, `telegram_bot_accounts`), no en `.env`. No se auto-crea ninguna fila placeholder: al arrancar, `StartupConfigurationReport` avisa si falta configuración.
+- Telegram sólo entrega a suscriptores activos (los que enviaron `/start`); un 403/blocked marca al suscriptor como inactivo.
+- Timeouts HTTP salientes: `spring.http.clients.connect-timeout` / `read-timeout` (nombre en **plural**), sólo aplican al `RestClient.Builder` autoconfigurado.
 
-## Project layout (`com.jmcode.notification`)
-- `channel/` — `NotificationChannel` impls (Email, WhatsApp, Telegram). New channels: implement `NotificationChannel`, register a `@Component`, add an entry to `ChannelType`.
-- `email/` — `EmailAccount` JPA entity + repo + service. Multi-tenant SMTP per `clientCode`.
-- `telegram/` — bot client, subscriber entity/repo/service, webhook payload, auto-registrar.
-- `service/NotificationService` — routes by `ChannelType` via `EnumMap`; bulk uses `sendSafe` (no throw per item).
-- `web/` — REST controllers (`/api/v1/notifications`, `/email-accounts`, `/telegram/*`), DTOs, `GlobalExceptionHandler`.
-- `domain/` — `NotificationRequest`, `NotificationResult`, `NotificationStatus`, `ChannelType`.
+## Estructura (`com.jmcode.notification`) — package by feature
+- `channel/` — contrato compartido: `NotificationChannel` (SPI) + modelo (`ChannelType`, `NotificationRequest/Result/Status`, `Attachment`).
+- `common/` — `ApiError`, `GlobalExceptionHandler` y las excepciones. Los servicios no dependen de la capa web.
+- `config/` — `NotificationProperties`, `OpenApiConfig`, `StartupConfigurationReport`.
+- `dispatch/` — `NotificationService` + `NotificationController` + dto.
+- `email/`, `telegram/`, `whatsapp/` — cada canal con sus entidades, servicios, controladores y dto.
+- `security/` — filtros JWT y API key, `SecurityConfig`, admin users, api clients.
 
-## Commands
-- Build: `.\mvnw.cmd clean package` (skip tests: `-DskipTests`).
-- Run app: `.\mvnw.cmd spring-boot:run`.
-- All tests: `.\mvnw.cmd test`.
-- Single test class: `.\mvnw.cmd test -Dtest=NotificationServiceTest`.
-- Single test method: `.\mvnw.cmd test -Dtest=NotificationServiceTest#sendSuccess`.
-- No formatter/lint configured — don't invent one. Match existing code style (4-space indent, package-private JPA setters, record-based DTOs and config props).
+Canal nuevo: implementa `NotificationChannel`, anótalo `@Component` y añade la constante en `ChannelType`. `NotificationService` los descubre por inyección y rechaza duplicados del mismo tipo.
 
-## Test notes
-- Context-load test (`JmNotificationApplicationTests`) disables email + telegram and uses in-memory H2, so it runs without real SMTP/Telegram creds.
-- `NotificationServiceTest` uses an inline anonymous `NotificationChannel` — no Spring context needed.
-- Telegram unit tests are in `src/test/java/.../telegram/`.
-- Integration with external providers (SMTP, Telegram API) is not mocked at the HTTP layer; tests touching channels rely on the `isEnabled`/`isConfigured` gates or stubbed channels.
+## Comandos
+- Build: `.\mvnw.cmd clean package` (sin tests: `-DskipTests`).
+- Ejecutar: `.\mvnw.cmd spring-boot:run`.
+- Tests: `.\mvnw.cmd test`; una clase: `-Dtest=JwtServiceTest`; un método: `-Dtest=JwtServiceTest#rejectsExpiredTokens`.
+- Sin formatter/linter configurado — no inventes uno. Sigue el estilo existente (indentación de 4, records para DTOs y properties, Lombok `@RequiredArgsConstructor` en beans, `@Getter/@Setter` en entidades).
 
-## REST surface (high-level)
-- `POST /api/v1/notifications` — send one. `clientCode` selects SMTP account; if omitted, default (`is_default=true`) is used.
-- `POST /api/v1/notifications/bulk` — array of `notifications`, returns per-item status (failures do not throw).
-- `GET /api/v1/notifications/channels` — map of `channel -> enabled`.
-- `GET/POST/PUT/DELETE /api/v1/email-accounts[/{id}]` — manage per-client SMTP accounts.
-- `POST /api/v1/telegram/webhook-admin` `{publicBaseUrl}` — register webhook; `GET` info; `DELETE` remove.
-- `POST /api/v1/telegram/webhook` — Telegram's inbound webhook (do not expose without `TELEGRAM_WEBHOOK_SECRET`).
-- `GET /api/v1/telegram/subscribers[/{chatId}]`; `PUT /api/v1/telegram/subscribers/link` to bind `externalUserId`.
+## Tests
+- `JmNotificationApplicationTests` levanta el contexto completo contra H2 en memoria.
+- `SecurityContractIntegrationTest` (MockMvc) fija el contrato HTTP: 401 en credenciales inválidas, endpoints admin autenticados, API key, webhook de Telegram con secret, 400 en canal desconocido.
+- Unitarios sin Spring: `PasswordEncryptorTest`, `JwtServiceTest`, `ApiKeyGeneratorTest`, `EmailTemplateRendererTest`, `NotificationRequestTest`, `NotificationServiceTest`, `TelegramSubscriberServiceTest`.
+- No hay mocks a nivel HTTP de SMTP/Telegram: los canales se prueban por sus gates `isEnabled`/`isConfigured` o con dobles.
 
-## Conventions
-- No CI workflows, no pre-commit, no formatter/linter — keep it that way unless asked.
-- Secrets never committed; `.env` only. Don't echo bot tokens / SMTP passwords in logs.
-- DTOs are Java records; config properties are records under `config/`.
-- Errors flow through `GlobalExceptionHandler` → `ApiError`. Throw `ChannelNotFoundException` or `NotificationSendException`; don't return ad-hoc responses.
+## Superficie REST
+- `POST /api/v1/admin/auth/login` `{email, password}` → `{token, expiresInSeconds, role}`. Credenciales inválidas → **401**.
+- `GET/POST/PUT/DELETE /api/v1/admin/email-accounts[/{id}]` — sólo SUPER_ADMIN.
+- `GET/POST/PUT/DELETE /api/v1/admin/telegram-bot-accounts[/{id}]` — SUPER_ADMIN o ADMIN.
+- `GET/POST /api/v1/admin/api-clients`, `POST /{id}/rotate-key` (clave en claro sólo una vez), `DELETE /{id}` (204 sin body).
+- `POST /api/v1/notifications`, `POST /api/v1/notifications/bulk`, `GET /api/v1/notifications/channels` — requieren `X-Api-Key`.
+- `POST /api/v1/telegram/webhook` — público para Telegram, autenticado por el header `X-Telegram-Bot-Api-Secret-Token`.
+- `/api/v1/telegram/webhook-admin` y `/api/v1/telegram/subscribers` — SUPER_ADMIN o ADMIN.
+
+## Modelo de auth
+- `AdminUser` (BCrypt, rol SUPER_ADMIN/ADMIN). Se siembra desde `ADMIN_EMAIL`/`ADMIN_PASSWORD` si la tabla está vacía.
+- `ApiClient`: clave `jmk_<43 url-safe>`, hash SHA-256; el valor en claro sólo se devuelve al crear o rotar.
+- JWT HS256 firmado con `JWT_SECRET`. Claims: `sub`, `email`, `role`.
+- `SecurityConfig` termina en `anyRequest().authenticated()`: un endpoint nuevo nace cerrado. Públicos: health/info, swagger, `/error` y `POST /api/v1/telegram/webhook`.
+- La consola H2 tiene su propia cadena `@Order(1)`, activa sólo si `spring.h2.console.enabled=true`.
+
+## Convenciones
+- Sin CI, sin pre-commit, sin formatter — mantenlo así salvo que se pida.
+- Secretos sólo en `.env`. Nunca loguear tokens de bot ni passwords SMTP.
+- Los DTOs de request hacen su propio mapeo (`applyTo(entity)`, `toDomain()`); los de response, `from(entity)`.
+- Los errores salen por `GlobalExceptionHandler` → `ApiError`. El catch-all de `Exception` loguea el stacktrace y devuelve un mensaje genérico: no expongas `ex.getMessage()` en un 500.
+- `log.error` recibe la excepción como último argumento para conservar el stacktrace.
+- Los canales nunca lanzan desde `send()`: devuelven `NotificationResult.failed(...)` o `.skipped(...)`.

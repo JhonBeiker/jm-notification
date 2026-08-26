@@ -9,7 +9,5 @@ public interface EmailTemplateRepository extends JpaRepository<EmailTemplate, Lo
 
     Optional<EmailTemplate> findByTenantIdAndName(String tenantId, String name);
 
-    Optional<EmailTemplate> findByTenantIdAndActiveTrue(String tenantId);
-
     boolean existsByTenantIdAndName(String tenantId, String name);
 }

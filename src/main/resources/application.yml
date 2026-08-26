@@ -2,32 +2,27 @@ spring:
   application:
     name: jm-notification
   datasource:
+    # El driver se deriva de la URL: así el mismo YAML sirve para Postgres y para H2
+    # (los tests apuntan a H2 en memoria sobreescribiendo sólo esta propiedad).
     url: ${DB_URL:jdbc:postgresql://localhost:5433/jm_notification}
-    driver-class-name: org.postgresql.Driver
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${JPA_DDL_AUTO:update}
     open-in-view: false
     properties:
       hibernate:
         jdbc:
           time_zone: UTC
-  mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-          ssl:
-            checkserveridentity: false
-            trust: ${MAIL_HOST:*} # Trusts the host passed in the environment variable, or use "*" to trust all
+  h2:
+    console:
+      enabled: ${H2_CONSOLE_ENABLED:false}
+  http:
+    clients:
+      # Sin timeouts, una llamada colgada a Telegram/Meta bloquea el hilo indefinidamente.
+      connect-timeout: ${HTTP_CONNECT_TIMEOUT:5s}
+      read-timeout: ${HTTP_READ_TIMEOUT:15s}
 
 server:
   port: ${SERVER_PORT:8050}
@@ -47,9 +42,15 @@ springdoc:
     tags-sorter: alpha
 
 notification:
+  auth:
+    admin-email: ${ADMIN_EMAIL:}
+    admin-password: ${ADMIN_PASSWORD:}
+    jwt-secret: ${JWT_SECRET:}
+    jwt-ttl: ${JWT_TTL:12h}
   email:
     enabled: ${NOTIFICATION_EMAIL_ENABLED:true}
-    from: ${MAIL_FROM:${MAIL_USERNAME:}}
+    from: ${MAIL_FROM:}
+    password-encryption-key: ${EMAIL_PASSWORD_ENCRYPTION_KEY:}
   whatsapp:
     enabled: ${NOTIFICATION_WHATSAPP_ENABLED:false}
     api-url: ${WHATSAPP_API_URL:https://graph.facebook.com/v21.0}
@@ -57,11 +58,13 @@ notification:
     access-token: ${WHATSAPP_ACCESS_TOKEN:}
   telegram:
     enabled: ${NOTIFICATION_TELEGRAM_ENABLED:false}
-    bot-token: ${TELEGRAM_BOT_TOKEN:}
     api-url: ${TELEGRAM_API_URL:https://api.telegram.org}
     webhook-secret: ${TELEGRAM_WEBHOOK_SECRET:}
     webhook-url: ${TELEGRAM_WEBHOOK_URL:}
     webhook-auto-register: ${TELEGRAM_WEBHOOK_AUTO_REGISTER:false}
     require-active-subscriber: ${TELEGRAM_REQUIRE_ACTIVE_SUBSCRIBER:true}
+    # sendDocument sube el fichero: necesita mucho mas margen que una llamada de texto.
+    upload-connect-timeout: ${TELEGRAM_UPLOAD_CONNECT_TIMEOUT:10s}
+    upload-read-timeout: ${TELEGRAM_UPLOAD_READ_TIMEOUT:2m}
     welcome-message: ${TELEGRAM_WELCOME_MESSAGE:Suscripcion activa. Ya puedes recibir notificaciones.}
     goodbye-message: ${TELEGRAM_GOODBYE_MESSAGE:Suscripcion cancelada. Usa /start para volver a activarla.}
