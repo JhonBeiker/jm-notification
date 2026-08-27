@@ -1,5 +1,7 @@
 package com.jmcode.notification.security;
 
+import com.jmcode.notification.company.Company;
+import com.jmcode.notification.company.CompanyRepository;
 import com.jmcode.notification.telegram.TelegramBotAccount;
 import com.jmcode.notification.telegram.TelegramBotAccountRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,8 +49,22 @@ class SecurityContractIntegrationTest {
     @Autowired
     private ApiClientService apiClientService;
 
+    @Autowired
+    private CompanyRepository companyRepository;
+
+    /** Toda API Key pertenece a una empresa: estos tests necesitan una a la que colgarlas. */
+    private Long companyId;
+
     @BeforeEach
     void seedBotAccountWithSecret() {
+        companyId = companyRepository.findByCodeIgnoreCase("contract-co")
+                .orElseGet(() -> {
+                    Company company = new Company();
+                    company.setCode("contract-co");
+                    company.setName("Contract Co");
+                    return companyRepository.save(company);
+                })
+                .getId();
         if (botAccountRepository.count() == 0) {
             TelegramBotAccount account = new TelegramBotAccount();
             account.setClientCode("cliente-a");
@@ -110,7 +126,7 @@ class SecurityContractIntegrationTest {
     @Test
     @DisplayName("una API key válida da acceso al estado de canales")
     void validApiKeyGrantsAccessToChannels() throws Exception {
-        String apiKey = apiClientService.create("contract-test", "dev@jmcode.local").plainKey();
+        String apiKey = apiClientService.create("contract-test", "dev@jmcode.local", companyId).plainKey();
 
         mockMvc.perform(get("/api/v1/notifications/channels").header(ApiKeyAuthFilter.HEADER, apiKey))
                 .andExpect(status().isOk())
@@ -160,7 +176,7 @@ class SecurityContractIntegrationTest {
     @Test
     @DisplayName("un canal inexistente en el JSON devuelve 400, no 500")
     void unknownChannelReturnsBadRequest() throws Exception {
-        String apiKey = apiClientService.create("contract-test-channel", null).plainKey();
+        String apiKey = apiClientService.create("contract-test-channel", null, companyId).plainKey();
 
         mockMvc.perform(post("/api/v1/notifications")
                         .header(ApiKeyAuthFilter.HEADER, apiKey)
@@ -173,7 +189,7 @@ class SecurityContractIntegrationTest {
     @Test
     @DisplayName("un request inválido devuelve 400 con el detalle del campo")
     void invalidRequestReturnsValidationDetails() throws Exception {
-        String apiKey = apiClientService.create("contract-test-validation", null).plainKey();
+        String apiKey = apiClientService.create("contract-test-validation", null, companyId).plainKey();
 
         mockMvc.perform(post("/api/v1/notifications")
                         .header(ApiKeyAuthFilter.HEADER, apiKey)

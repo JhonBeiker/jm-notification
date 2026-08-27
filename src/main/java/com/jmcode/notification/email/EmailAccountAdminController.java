@@ -22,7 +22,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/email-accounts")
-@Tag(name = "Email Accounts", description = "Gestión de cuentas SMTP por cliente almacenadas en Base de Datos")
+@Tag(name = "Email Accounts",
+        description = "Cuentas SMTP por cliente. El ADMIN de una empresa sólo ve y edita las suyas")
 @SecurityRequirement(name = "adminJwt")
 @RequiredArgsConstructor
 public class EmailAccountAdminController {
@@ -45,13 +46,13 @@ public class EmailAccountAdminController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Crear cuenta de correo SMTP para un cliente")
     public EmailAccountResponseDto create(@Valid @RequestBody EmailAccountRequestDto dto) {
-        return EmailAccountResponseDto.from(accountService.save(dto.applyTo(new EmailAccount())));
+        return EmailAccountResponseDto.from(accountService.save(dto.applyTo(new EmailAccount()), dto.companyId()));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar cuenta de correo SMTP")
     public EmailAccountResponseDto update(@PathVariable Long id, @Valid @RequestBody EmailAccountRequestDto dto) {
-        return EmailAccountResponseDto.from(accountService.save(dto.applyTo(accountService.getById(id))));
+        return EmailAccountResponseDto.from(accountService.save(dto.applyTo(accountService.getById(id)), dto.companyId()));
     }
 
     @DeleteMapping("/{id}")

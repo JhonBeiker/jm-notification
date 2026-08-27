@@ -1,7 +1,11 @@
 package com.jmcode.notification.telegram;
 
+import com.jmcode.notification.company.Company;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,7 +26,8 @@ import java.time.Instant;
         uniqueConstraints = @UniqueConstraint(name = "uk_telegram_bot_client_code", columnNames = "client_code"),
         indexes = {
                 @Index(name = "idx_telegram_bot_active", columnList = "active"),
-                @Index(name = "idx_telegram_bot_is_default", columnList = "is_default")
+                @Index(name = "idx_telegram_bot_is_default", columnList = "is_default"),
+                @Index(name = "idx_telegram_bot_company", columnList = "company_id")
         }
 )
 @Getter
@@ -34,8 +39,10 @@ public class TelegramBotAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "tenant_id", length = 64)
-    private String tenantId;
+    /** Empresa propietaria. Sustituye a la antigua columna suelta {@code tenant_id}. */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @Column(name = "client_code", nullable = false, length = 64)
     private String clientCode;

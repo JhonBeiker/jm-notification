@@ -9,6 +9,9 @@ public record TelegramBotAccountRequestDto(
 
         @NotBlank @Size(max = 64) String clientCode,
 
+        /** Empresa propietaria. Obligatorio para SUPER_ADMIN; el ADMIN de empresa usa siempre la suya. */
+        Long companyId,
+
         @Size(max = 128) String name,
 
         @NotBlank

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +23,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/api-clients")
-@Tag(name = "Api Clients", description = "Gestión de clientes con API Key para usar el servicio")
+@Tag(name = "Api Clients",
+        description = "Clientes con API Key. Cada clave pertenece a una empresa y sólo envía por sus cuentas; "
+                + "el ADMIN de una empresa gestiona las suyas")
 @SecurityRequirement(name = "adminJwt")
 @RequiredArgsConstructor
 public class ApiClientAdminController {
@@ -30,16 +33,17 @@ public class ApiClientAdminController {
     private final ApiClientService apiClientService;
 
     @GetMapping
-    @Operation(summary = "Listar clientes registrados")
-    public List<ApiClientResponseDto> list() {
-        return apiClientService.listAll().stream().map(ApiClientResponseDto::from).toList();
+    @Operation(summary = "Listar clientes registrados", description = "Filtra por empresa con ?companyId=")
+    public List<ApiClientResponseDto> list(@RequestParam(required = false) Long companyId) {
+        return apiClientService.list(companyId).stream().map(ApiClientResponseDto::from).toList();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear cliente; devuelve la API Key UNA sola vez")
+    @Operation(summary = "Crear cliente para una empresa; devuelve la API Key UNA sola vez",
+            description = "El SUPER_ADMIN indica companyId; el ADMIN de una empresa lo omite y usa la suya.")
     public CreatedApiClientResponseDto create(@Valid @RequestBody CreateApiClientRequestDto dto) {
-        var created = apiClientService.create(dto.name(), dto.contactEmail());
+        var created = apiClientService.create(dto.name(), dto.contactEmail(), dto.companyId());
         return CreatedApiClientResponseDto.from(created.client(), created.plainKey());
     }
 

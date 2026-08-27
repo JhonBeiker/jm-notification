@@ -29,7 +29,10 @@ public class AdminAuthController {
     public LoginResponseDto login(@Valid @RequestBody LoginRequestDto dto) {
         AdminUser user = adminUserService.authenticate(dto.email(), dto.password());
         adminUserService.markLoggedIn(user.getId());
-        String token = jwtService.issue(user.getId(), user.getEmail(), user.getRole());
-        return new LoginResponseDto(token, authProperties.jwtTtl().toSeconds(), user.getRole().name());
+        Long companyId = user.getCompany() == null ? null : user.getCompany().getId();
+        String companyCode = user.getCompany() == null ? null : user.getCompany().getCode();
+        String token = jwtService.issue(user.getId(), user.getEmail(), user.getRole(), companyId);
+        return new LoginResponseDto(token, authProperties.jwtTtl().toSeconds(), user.getRole().name(),
+                companyId, companyCode);
     }
 }

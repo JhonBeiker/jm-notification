@@ -78,7 +78,11 @@ public class SecurityConfig {
                         // real es el secret token que valida el propio controlador.
                         .requestMatchers(HttpMethod.POST, "/api/v1/telegram/webhook").permitAll()
                         .requestMatchers("/api/v1/admin/auth/login").permitAll()
-                        .requestMatchers("/api/v1/admin/email-accounts/**").hasRole(Role.SUPER_ADMIN.name())
+                        // Empresas y usuarios administradores son ámbito global.
+                        .requestMatchers("/api/v1/admin/companies/**").hasRole(Role.SUPER_ADMIN.name())
+                        .requestMatchers("/api/v1/admin/users/**").hasRole(Role.SUPER_ADMIN.name())
+                        // Cuentas de correo, bots, plantillas y API Keys: el ADMIN entra, pero
+                        // cada servicio filtra por la empresa del token (ver CompanyScope).
                         .requestMatchers("/api/v1/admin/**").hasAnyRole(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
                         .requestMatchers("/api/v1/notifications/**").hasRole("API_CLIENT")
                         .requestMatchers("/api/v1/telegram/**")

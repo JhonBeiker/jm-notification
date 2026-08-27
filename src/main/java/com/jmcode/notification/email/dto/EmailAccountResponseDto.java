@@ -6,6 +6,8 @@ import java.time.Instant;
 
 public record EmailAccountResponseDto(
         Long id,
+        Long companyId,
+        String companyCode,
         String clientCode,
         String name,
         String host,
@@ -26,6 +28,8 @@ public record EmailAccountResponseDto(
     public static EmailAccountResponseDto from(EmailAccount account) {
         return new EmailAccountResponseDto(
                 account.getId(),
+                account.getCompany() == null ? null : account.getCompany().getId(),
+                account.getCompany() == null ? null : account.getCompany().getCode(),
                 account.getClientCode(),
                 account.getName(),
                 account.getHost(),

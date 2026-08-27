@@ -1,8 +1,12 @@
 package com.jmcode.notification.security;
 
 import jakarta.persistence.Column;
+import com.jmcode.notification.company.Company;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -36,6 +40,15 @@ public class AdminUser {
 
     @Column(name = "password_hash", nullable = false, length = 100)
     private String passwordHash;
+
+    /**
+     * Empresa a la que pertenece el administrador. {@code null} sólo para SUPER_ADMIN,
+     * que no está atado a ninguna. EAGER a propósito: el login y los DTO leen la empresa
+     * fuera de la transacción y {@code open-in-view} está desactivado.
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)

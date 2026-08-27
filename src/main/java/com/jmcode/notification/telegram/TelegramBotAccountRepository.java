@@ -18,6 +18,11 @@ public interface TelegramBotAccountRepository extends JpaRepository<TelegramBotA
 
     Optional<TelegramBotAccount> findFirstByActiveTrueOrderByIdAsc();
 
+    /** Mismo orden de resolución, pero dentro de la empresa del llamante acotado. */
+    Optional<TelegramBotAccount> findByCompanyIdAndIsDefaultTrueAndActiveTrue(Long companyId);
+
+    Optional<TelegramBotAccount> findFirstByCompanyIdAndActiveTrueOrderByIdAsc(Long companyId);
+
     boolean existsByClientCodeIgnoreCase(String clientCode);
 
     Optional<TelegramBotAccount> findByWebhookSecretAndActiveTrue(String webhookSecret);
@@ -28,4 +33,8 @@ public interface TelegramBotAccountRepository extends JpaRepository<TelegramBotA
     boolean existsActiveWithWebhookSecret();
 
     long countByActiveTrue();
+
+    List<TelegramBotAccount> findAllByCompanyId(Long companyId);
+
+    long countByCompanyId(Long companyId);
 }

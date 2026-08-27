@@ -1,6 +1,7 @@
 package com.jmcode.notification.config;
 
 import com.jmcode.notification.email.EmailAccountRepository;
+import com.jmcode.notification.security.ApiClientRepository;
 import com.jmcode.notification.telegram.TelegramBotAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ public class StartupConfigurationReport implements ApplicationRunner {
     private final NotificationProperties properties;
     private final EmailAccountRepository emailAccountRepository;
     private final TelegramBotAccountRepository telegramBotAccountRepository;
+    private final ApiClientRepository apiClientRepository;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -51,6 +53,12 @@ public class StartupConfigurationReport implements ApplicationRunner {
             }
         } else {
             log.info("TELEGRAM channel disabled (notification.telegram.enabled=false)");
+        }
+
+        long unscopedKeys = apiClientRepository.countByCompanyIsNull();
+        if (unscopedKeys > 0) {
+            log.warn("{} API key(s) have no company: they can still send through ANY account. "
+                    + "Assign a company with PUT /api/v1/admin/api-clients/{{id}}", unscopedKeys);
         }
 
         if (properties.whatsapp().enabled()) {

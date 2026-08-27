@@ -6,6 +6,8 @@ import java.time.Instant;
 
 public record TelegramBotAccountResponseDto(
         Long id,
+        Long companyId,
+        String companyCode,
         String clientCode,
         String name,
         String apiUrl,
@@ -22,6 +24,8 @@ public record TelegramBotAccountResponseDto(
     public static TelegramBotAccountResponseDto from(TelegramBotAccount account) {
         return new TelegramBotAccountResponseDto(
                 account.getId(),
+                account.getCompany() == null ? null : account.getCompany().getId(),
+                account.getCompany() == null ? null : account.getCompany().getCode(),
                 account.getClientCode(),
                 account.getName(),
                 account.getApiUrl(),

@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -31,7 +32,7 @@ public class EmailNotificationChannel implements NotificationChannel {
 
     private final EmailAccountService accountService;
     private final EmailAccountManager accountManager;
-    private final EmailTemplateRepository templateRepository;
+    private final EmailTemplateService templateService;
     private final EmailTemplateRenderer templateRenderer;
     private final NotificationProperties properties;
 
@@ -54,6 +55,9 @@ public class EmailNotificationChannel implements NotificationChannel {
         EmailAccount account;
         try {
             account = accountService.resolveAccount(request.effectiveClientCode());
+        } catch (AccessDeniedException ex) {
+            // Un clientCode de otra empresa es un 403, no un fallo del proveedor: se propaga.
+            throw ex;
         } catch (RuntimeException ex) {
             return NotificationResult.failed(supports(), request.to(), ex.getMessage());
         }
@@ -77,11 +81,8 @@ public class EmailNotificationChannel implements NotificationChannel {
         if (!request.hasTemplate()) {
             return new RenderedEmail(request.subject(), request.message(), templateRenderer.looksLikeHtml(request.message()));
         }
-        EmailTemplate template = templateRepository
-                .findByTenantIdAndName(account.getTenantId(), request.templateName())
-                .filter(EmailTemplate::isActive)
-                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException(
-                        "Active email template not found: " + request.templateName()));
+        // La plantilla se busca dentro de la empresa dueña de la cuenta SMTP.
+        EmailTemplate template = templateService.resolveForAccount(account, request.templateName());
 
         return new RenderedEmail(
                 templateRenderer.render(template.getSubject(), request.variables()),

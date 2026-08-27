@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,7 +15,15 @@ public interface ApiClientRepository extends JpaRepository<ApiClient, Long> {
 
     Optional<ApiClient> findByApiKeyHash(String apiKeyHash);
 
-    boolean existsByNameIgnoreCase(String name);
+    /** El nombre sólo tiene que ser único dentro de la empresa. */
+    boolean existsByCompanyIdAndNameIgnoreCase(Long companyId, String name);
+
+    List<ApiClient> findAllByCompanyId(Long companyId);
+
+    long countByCompanyId(Long companyId);
+
+    /** Claves anteriores a las empresas: siguen pudiendo usar cualquier cuenta. */
+    long countByCompanyIsNull();
 
     /**
      * Marca de último uso en un solo UPDATE. La versión anterior cargaba la entidad y la

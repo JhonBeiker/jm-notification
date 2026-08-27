@@ -35,10 +35,11 @@ com.jmcode.notification
 ├── channel/      SPI + shared model: NotificationChannel, ChannelType,
 │                 NotificationRequest/Result/Status, Attachment
 ├── common/       ApiError, GlobalExceptionHandler, shared exceptions
+├── company/      Company + CompanyScope (tenant of everything below), admin controller, dto
 ├── config/       NotificationProperties, OpenApiConfig, StartupConfigurationReport
 ├── dispatch/     NotificationService + NotificationController + dto
 ├── email/        EmailAccount*, EmailTemplate*, EmailNotificationChannel,
-│                 PasswordEncryptor, admin controller, dto
+│                 PasswordEncryptor, admin controllers, dto
 ├── telegram/     bot accounts, subscribers, webhook, bot client, channel, dto
 ├── whatsapp/     WhatsAppNotificationChannel
 └── security/     JWT + API key auth, admin users, api clients, SecurityConfig
@@ -50,6 +51,46 @@ Exceptions live in `common/`, not in the web layer — services throw them witho
 `NotificationChannel` (`supports()` / `isEnabled()` / `send()`) is the only extension point. `NotificationService` collects every `@Component` implementation into an `EnumMap` at construction and rejects duplicate `ChannelType` registrations. Adding a channel = implement the interface, annotate `@Component`, add a `ChannelType` constant.
 
 `send()` throws `NotificationSendException` on a `FAILED` result (→ 502); `sendBulk()` catches it per item so one bad element never aborts the batch. Channels never throw out of `send()` — they return `NotificationResult.failed(...)` / `.skipped(...)`.
+
+### Companies (`company/`)
+`Company` is the tenant row: `AdminUser`, `EmailAccount`, `EmailTemplate` and `TelegramBotAccount`
+all point at it through a nullable `company_id` FK (EAGER — `open-in-view` is off and the DTOs read
+the company after the transaction closes). It replaced the loose `tenant_id` column those tables
+carried; that column stays in the database untouched but is no longer mapped, so pre-existing rows
+come back with `company = null` until a SUPER_ADMIN assigns one.
+
+Two levels of administrator, told apart by the FK, not by a third role:
+- **SUPER_ADMIN** — `company = null`. Creates companies (`/api/v1/admin/companies`) and their admin
+  users (`/api/v1/admin/users`) — those two endpoints are SUPER_ADMIN-only — and sees every row.
+- **ADMIN** — belongs to one company and manages its SMTP accounts, Telegram bots, email templates
+  and API keys.
+
+`ApiClient` carries the same FK: a key belongs to one company and may only send through that
+company's accounts. `resolveAccount(clientCode)` asserts it (another company's `clientCode` → 403)
+and, with no `clientCode`, resolves that company's default instead of the global one. A key always
+gets a company — a company ADMIN's own, or the `companyId` a SUPER_ADMIN passes; creating one with
+neither is a 400, since an unscoped key could send through any account. Only pre-existing keys have
+no company, and those stay unscoped for compatibility — `StartupConfigurationReport` WARNs about them
+at boot. Key names are unique per company, not globally. WhatsApp has no per-company account (it is
+global env config), so it is not scoped.
+
+`CompanyScope` is the single place that decides what a request may touch: `filterCompanyId()` for
+listings, `assertCanAccess(company)` for reads/sends (403 on another company's row), and
+`resolveOwner(requestedCompanyId)` for writes — a company admin's rows are always stamped with their
+own company, and asking for another one is rejected. It reads the scope off whichever principal is
+in the context: an `AuthPrincipal` (JWT) or the `ApiClient` entity (API key). With no principal at
+all (startup runners, the inbound Telegram webhook) nothing is restricted. An ADMIN with no company
+is denied instead of inheriting global access.
+
+A cross-company `clientCode` surfaces as **403**: the channels re-throw `AccessDeniedException`
+instead of turning it into a `FAILED` result (a 502 would blame the provider), while
+`NotificationService.sendSafe` catches it per item so one bad element never aborts a bulk.
+
+`isDefault` on an email account or bot stays **global** (it is what a send without `clientCode`
+resolves to), so only a SUPER_ADMIN may set it.
+
+Sending is deliberately unscoped: `resolveAccount(clientCode)` and the Telegram webhook lookup keep
+working off `clientCode` / the webhook secret, not off any admin's company.
 
 ### Multi-tenancy by `clientCode`
 Email and Telegram both resolve a per-client account row before sending. The resolution order lives in one place — `NotificationRequest.effectiveClientCode()`: explicit `clientCode`, else `metadata["clientCode"]`, else `is_default=true`, else first active row.
@@ -72,6 +113,11 @@ Two filters run before `UsernamePasswordAuthenticationFilter`, each registered a
 `/start` creates or reactivates a `TelegramSubscriber` (binding the deep-link payload to `externalUserId`); `/stop` and any blocked/deactivated/forbidden/chat-not-found provider error flips `active=false`. Outbound `to` is a numeric `chat_id` or a linked `externalUserId`.
 
 ### Email rendering
+Templates are managed through `/api/v1/admin/email-templates` (`EmailTemplateService`), unique by
+name **per company**; an empty `contentType` is inferred from the body. `EmailNotificationChannel`
+resolves a template inside the company that owns the SMTP account (and among the company-less
+templates when the account has no company).
+
 `EmailTemplateRenderer` (a plain `@Component`, testable without SMTP) substitutes `{{var}}` placeholders — unknown placeholders are left intact rather than rendered as `null` — and detects HTML via one regex. `EmailNotificationChannel` resolves the account, renders, builds the MIME message and sends. Attachments arrive base64-encoded: email accepts many, Telegram takes only the first (`sendDocument`), WhatsApp none.
 
 ## Jackson: two majors on the classpath
@@ -92,6 +138,12 @@ Spring Boot 4.1 uses **Jackson 3** (`tools.jackson.*`) for the application `Obje
 
 ## Tests
 
-`JmNotificationApplicationTests` boots the full context against in-memory H2. The rest are plain unit tests with no Spring context: `PasswordEncryptorTest`, `JwtServiceTest`, `ApiKeyGeneratorTest`, `EmailTemplateRendererTest`, `NotificationRequestTest`, `NotificationServiceTest` (anonymous `NotificationChannel`), `TelegramSubscriberServiceTest` (Mockito).
+`JmNotificationApplicationTests` boots the full context against in-memory H2.
+`SecurityContractIntegrationTest` and `CompanyScopeIntegrationTest` are MockMvc tests over the same
+H2 context — the latter pins the tenant contract (a company admin only sees its own rows, 403 across
+companies, 409 deleting a company that still has data). Its seed data is `static` because JUnit
+builds one instance per test while the database is shared.
+Request DTOs with primitive `boolean` components need every flag present in the JSON: Jackson refuses
+to map an absent value onto a primitive. The rest are plain unit tests with no Spring context: `PasswordEncryptorTest`, `JwtServiceTest`, `ApiKeyGeneratorTest`, `EmailTemplateRendererTest`, `NotificationRequestTest`, `NotificationServiceTest` (anonymous `NotificationChannel`), `TelegramSubscriberServiceTest` (Mockito).
 
 Constructing a `NotificationRequestDto` requires all nine record components, so adding a field there breaks every existing test call site.

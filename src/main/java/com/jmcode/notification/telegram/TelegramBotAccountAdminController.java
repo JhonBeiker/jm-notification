@@ -22,7 +22,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/telegram-bot-accounts")
-@Tag(name = "Telegram Bot Accounts", description = "Gestión de cuentas de bots de Telegram por cliente almacenadas en Base de Datos")
+@Tag(name = "Telegram Bot Accounts",
+        description = "Bots de Telegram por cliente. El ADMIN de una empresa sólo ve y edita los suyos")
 @SecurityRequirement(name = "adminJwt")
 @RequiredArgsConstructor
 public class TelegramBotAccountAdminController {
@@ -45,13 +46,13 @@ public class TelegramBotAccountAdminController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Crear cuenta de bot de Telegram para un cliente")
     public TelegramBotAccountResponseDto create(@Valid @RequestBody TelegramBotAccountRequestDto dto) {
-        return TelegramBotAccountResponseDto.from(accountService.save(dto.applyTo(new TelegramBotAccount())));
+        return TelegramBotAccountResponseDto.from(accountService.save(dto.applyTo(new TelegramBotAccount()), dto.companyId()));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar cuenta de bot de Telegram")
     public TelegramBotAccountResponseDto update(@PathVariable Long id, @Valid @RequestBody TelegramBotAccountRequestDto dto) {
-        return TelegramBotAccountResponseDto.from(accountService.save(dto.applyTo(accountService.getById(id))));
+        return TelegramBotAccountResponseDto.from(accountService.save(dto.applyTo(accountService.getById(id)), dto.companyId()));
     }
 
     @DeleteMapping("/{id}")
