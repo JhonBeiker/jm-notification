@@ -76,6 +76,93 @@ $env:JAVA_HOME="C:\Users\jhonb\.jdks\corretto-25.0.1"
 Swagger declara los dos esquemas de autenticación (`adminJwt` con Bearer y `apiKey` con
 `X-Api-Key`), así que se puede autenticar y probar los endpoints desde la propia UI.
 
+## Empresas y administradores
+
+Cada empresa cliente es una fila en `companies`. Las cuentas SMTP, los bots de Telegram y las
+plantillas de correo cuelgan de ella, y cada empresa tiene su propio usuario administrador, que es
+quien carga esos datos.
+
+- **SUPER_ADMIN** (el que se siembra con `ADMIN_EMAIL` / `ADMIN_PASSWORD`): crea empresas y sus
+  administradores, y ve todas las filas.
+- **ADMIN**: pertenece a una empresa y sólo ve y edita las cuentas, bots y plantillas de la suya.
+  Intentar leer o asignar datos de otra empresa devuelve **403**.
+
+### 1. Crear la empresa (SUPER_ADMIN)
+
+```http
+POST http://localhost:8050/api/v1/admin/companies
+Content-Type: application/json
+Authorization: Bearer <jwt-super-admin>
+
+{
+  "code": "cliente-a",
+  "name": "Cliente A S.A.S.",
+  "taxId": "900123456-7",
+  "contactEmail": "soporte@clientea.com",
+  "active": true
+}
+```
+
+Borrar una empresa que todavía tiene usuarios, cuentas o plantillas devuelve **409** con el detalle
+de lo que falta desvincular. Desactivarla (`active: false`) deja fuera del login a sus administradores.
+
+### 2. Crear el administrador de la empresa (SUPER_ADMIN)
+
+```http
+POST http://localhost:8050/api/v1/admin/users
+Content-Type: application/json
+Authorization: Bearer <jwt-super-admin>
+
+{
+  "email": "admin@clientea.com",
+  "password": "una-password-larga",
+  "role": "ADMIN",
+  "companyId": 1
+}
+```
+
+`role: "ADMIN"` exige `companyId`; `role: "SUPER_ADMIN"` no admite ninguno. Otros endpoints:
+`GET /api/v1/admin/users?companyId=1`, `PUT /{id}` (rol, empresa y estado),
+`PUT /{id}/password` y `DELETE /{id}`.
+
+### 3. El administrador entra y carga sus datos
+
+`POST /api/v1/admin/auth/login` devuelve `{token, expiresInSeconds, role, companyId, companyCode}`.
+Con ese token, el administrador de la empresa crea sus cuentas SMTP, sus bots de Telegram y sus
+plantillas **sin enviar `companyId`**: se asigna sola la suya.
+
+| Método | Endpoint | Quién |
+|---|---|---|
+| GET/POST/PUT/DELETE | `/api/v1/admin/companies[/{id}]` | SUPER_ADMIN |
+| GET/POST/PUT/DELETE | `/api/v1/admin/users[/{id}]` | SUPER_ADMIN |
+| GET/POST/PUT/DELETE | `/api/v1/admin/email-accounts[/{id}]` | SUPER_ADMIN o el ADMIN de la empresa |
+| GET/POST/PUT/DELETE | `/api/v1/admin/email-templates[/{id}]` | SUPER_ADMIN o el ADMIN de la empresa |
+| GET/POST/PUT/DELETE | `/api/v1/admin/telegram-bot-accounts[/{id}]` | SUPER_ADMIN o el ADMIN de la empresa |
+
+> `isDefault` marca la cuenta o el bot que se usa cuando el envío no trae `clientCode`: es global,
+> así que sólo lo puede marcar un SUPER_ADMIN.
+
+## Plantillas de correo
+
+```http
+POST http://localhost:8050/api/v1/admin/email-templates
+Content-Type: application/json
+Authorization: Bearer <jwt-admin-empresa>
+
+{
+  "name": "bienvenida",
+  "subject": "Hola {{nombre}}",
+  "content": "<p>Hola {{nombre}}, tu pedido {{pedido}} va en camino.</p>",
+  "contentType": "html",
+  "variables": "[\"nombre\",\"pedido\"]",
+  "active": true
+}
+```
+
+El nombre es único dentro de la empresa. Si se omite `contentType` se deduce del contenido. En el
+envío se referencia con `templateName` y los valores van en `variables`; un placeholder sin valor se
+deja tal cual en vez de imprimir `null`.
+
 ## Configuración de Correo Dinámica (Base de Datos)
 
 El sistema soporta múltiples cuentas SMTP por cliente almacenadas en Base de Datos.
@@ -102,7 +189,10 @@ Content-Type: application/json
 }
 ```
 
-Otros endpoints (todos bajo `/api/v1/admin`, sólo SUPER_ADMIN):
+Un SUPER_ADMIN debe añadir `"companyId": 1` para indicar de qué empresa es la cuenta; el
+administrador de una empresa no lo envía (se asigna la suya).
+
+Otros endpoints (todos bajo `/api/v1/admin`, SUPER_ADMIN o el ADMIN de la empresa):
 - `GET /api/v1/admin/email-accounts`
 - `GET /api/v1/admin/email-accounts/{id}`
 - `PUT /api/v1/admin/email-accounts/{id}`
@@ -331,7 +421,11 @@ Datos locales H2: carpeta `./data/` (consola en `/h2-console`).
 
 Las notificaciones requieren autenticación mediante **API Key** (header `X-Api-Key`).
 
-### Crear API Client (solo SUPER_ADMIN)
+Cada API Key **pertenece a una empresa** y sólo puede enviar por las cuentas de esa empresa:
+un `clientCode` de otra empresa devuelve **403**, y si el envío no trae `clientCode` se usa la
+cuenta por defecto **de su empresa**, no la global.
+
+### Crear API Client (SUPER_ADMIN o el ADMIN de la empresa)
 
 ```http
 POST http://localhost:8050/api/v1/admin/api-clients
@@ -340,18 +434,31 @@ Authorization: Bearer <jwt-admin-token>
 
 {
   "name": "Mi Aplicación",
-  "contactEmail": "dev@miapp.com"
+  "contactEmail": "dev@miapp.com",
+  "companyId": 1
 }
 ```
+
+El administrador de una empresa **omite `companyId`**: la clave se crea en la suya, y sólo ve,
+rota y borra las de su empresa (las de otra dan 403). El SUPER_ADMIN sí debe indicarlo; crear una
+clave sin empresa devuelve 400. El nombre es único dentro de la empresa.
+
+Las claves creadas antes de existir las empresas quedan sin `company_id` y siguen pudiendo usar
+cualquier cuenta; al arrancar se avisa con un WARN cuántas hay pendientes de asignar.
 
 **Respuesta** (la key completa **solo se muestra una vez**):
 
 ```json
 {
-  "id": 1,
-  "name": "Mi Aplicación",
-  "contactEmail": "dev@miapp.com",
-  "apiKeyPrefix": "jmk_abc123...",
+  "client": {
+    "id": 1,
+    "companyId": 1,
+    "companyCode": "cliente-a",
+    "name": "Mi Aplicación",
+    "contactEmail": "dev@miapp.com",
+    "apiKeyPrefix": "jmk_abc123...",
+    "active": true
+  },
   "apiKey": "jmk_abc123def456ghi789jkl012mno345pqr678stu901"
 }
 ```
@@ -377,7 +484,7 @@ curl -X POST http://localhost:8050/api/v1/notifications \
 
 | Método | Endpoint | Descripción |
 |---|---|---|
-| GET | `/api/v1/admin/api-clients` | Listar |
-| POST | `/api/v1/admin/api-clients` | Crear (devuelve key una vez) |
+| GET | `/api/v1/admin/api-clients[?companyId=1]` | Listar (el ADMIN sólo ve las suyas) |
+| POST | `/api/v1/admin/api-clients` | Crear para una empresa (devuelve key una vez) |
 | POST | `/api/v1/admin/api-clients/{id}/rotate-key` | Rotar key (devuelve nueva) |
 | DELETE | `/api/v1/admin/api-clients/{id}` | Eliminar |

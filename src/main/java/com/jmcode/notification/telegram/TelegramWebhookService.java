@@ -1,5 +1,6 @@
 package com.jmcode.notification.telegram;
 
+import com.jmcode.notification.company.CompanyScope;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -15,9 +16,10 @@ public class TelegramWebhookService {
 
     private final TelegramBotAccountService accountService;
     private final TelegramBotAccountManager accountManager;
+    private final CompanyScope companyScope;
 
     public Map<String, Object> register(String publicBaseUrl, String clientCode) {
-        TelegramBotAccount account = accountService.resolveAccount(clientCode);
+        TelegramBotAccount account = resolveOwnAccount(clientCode);
         String webhookUrl = resolveWebhookUrl(account, publicBaseUrl);
         requireHttps(webhookUrl);
 
@@ -33,13 +35,13 @@ public class TelegramWebhookService {
     }
 
     public Map<String, Object> unregister(String clientCode) {
-        TelegramBotAccount account = accountService.resolveAccount(clientCode);
+        TelegramBotAccount account = resolveOwnAccount(clientCode);
         Map<String, Object> telegramResponse = accountManager.getClient(account).deleteWebhook();
         return Map.of("clientCode", account.getClientCode(), "telegram", telegramResponse);
     }
 
     public Map<String, Object> info(String clientCode) {
-        TelegramBotAccount account = accountService.resolveAccount(clientCode);
+        TelegramBotAccount account = resolveOwnAccount(clientCode);
         Map<String, Object> telegramResponse = accountManager.getClient(account).getWebhookInfo();
 
         Map<String, Object> result = new LinkedHashMap<>();
@@ -52,8 +54,19 @@ public class TelegramWebhookService {
     }
 
     public Map<String, Object> botInfo(String clientCode) {
-        TelegramBotAccount account = accountService.resolveAccount(clientCode);
+        TelegramBotAccount account = resolveOwnAccount(clientCode);
         return accountManager.getClient(account).getMe();
+    }
+
+    /**
+     * Sin filtro por empresa el ADMIN podría administrar el webhook del bot de otra
+     * pasando su {@code clientCode}. El auto-registro de arranque no tiene principal:
+     * {@link CompanyScope} lo trata como llamada de sistema y no lo restringe.
+     */
+    private TelegramBotAccount resolveOwnAccount(String clientCode) {
+        TelegramBotAccount account = accountService.resolveAccount(clientCode);
+        companyScope.assertCanAccess(account.getCompany());
+        return account;
     }
 
     private static String resolveWebhookUrl(TelegramBotAccount account, String publicBaseUrl) {

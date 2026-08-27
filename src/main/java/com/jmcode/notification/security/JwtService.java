@@ -41,7 +41,7 @@ public class JwtService {
         this.ttlMillis = props.jwtTtl().toMillis();
     }
 
-    public String issue(Long userId, String email, Role role) {
+    public String issue(Long userId, String email, Role role, Long companyId) {
         Map<String, Object> header = new LinkedHashMap<>();
         header.put("alg", "HS256");
         header.put("typ", "JWT");
@@ -51,6 +51,10 @@ public class JwtService {
         claims.put("sub", String.valueOf(userId));
         claims.put("email", email);
         claims.put("role", role.name());
+        // Ámbito de empresa: ausente para SUPER_ADMIN, que no está limitado a ninguna.
+        if (companyId != null) {
+            claims.put("cid", companyId);
+        }
         claims.put("iat", now.getEpochSecond());
         claims.put("exp", now.plusMillis(ttlMillis).getEpochSecond());
 
@@ -91,7 +95,8 @@ public class JwtService {
             if (!(sub instanceof String s) || !(email instanceof String e) || !(role instanceof String r)) {
                 return Optional.empty();
             }
-            return Optional.of(new AuthPrincipal(Long.parseLong(s), e, Role.valueOf(r)));
+            Long companyId = claims.get("cid") instanceof Number cid ? cid.longValue() : null;
+            return Optional.of(new AuthPrincipal(Long.parseLong(s), e, Role.valueOf(r), companyId));
         } catch (Exception ex) {
             return Optional.empty();
         }

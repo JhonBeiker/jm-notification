@@ -8,6 +8,7 @@ import com.jmcode.notification.config.NotificationProperties;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClientResponseException;
@@ -49,6 +50,9 @@ public class TelegramNotificationChannel implements NotificationChannel {
         TelegramBotAccount account;
         try {
             account = accountService.resolveAccount(request.effectiveClientCode());
+        } catch (AccessDeniedException ex) {
+            // Un clientCode de otra empresa es un 403, no un fallo del proveedor: se propaga.
+            throw ex;
         } catch (RuntimeException ex) {
             return NotificationResult.failed(supports(), request.to(), ex.getMessage());
         }

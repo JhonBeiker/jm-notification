@@ -6,6 +6,8 @@ import java.time.Instant;
 
 public record ApiClientResponseDto(
         Long id,
+        Long companyId,
+        String companyCode,
         String name,
         String contactEmail,
         String apiKeyPrefix,
@@ -17,6 +19,8 @@ public record ApiClientResponseDto(
     public static ApiClientResponseDto from(ApiClient client) {
         return new ApiClientResponseDto(
                 client.getId(),
+                client.getCompany() == null ? null : client.getCompany().getId(),
+                client.getCompany() == null ? null : client.getCompany().getCode(),
                 client.getName(),
                 client.getContactEmail(),
                 client.getApiKeyPrefix(),

@@ -1,7 +1,9 @@
 package com.jmcode.notification.telegram;
 
+import com.jmcode.notification.company.CompanyScope;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -15,13 +17,29 @@ public class TelegramBotAccountService {
 
     private final TelegramBotAccountRepository repository;
     private final TelegramBotAccountManager accountManager;
+    private final CompanyScope companyScope;
 
+    /**
+     * Resolución de envío / webhook. La API Key (y el JWT de un ADMIN) acotan a su empresa:
+     * un {@code clientCode} ajeno se rechaza con 403 y, sin {@code clientCode}, el bot por
+     * defecto que se busca es el de esa empresa. El webhook entrante no lleva identidad,
+     * así que sigue resolviendo por el secret contra cualquier cuenta.
+     */
     @Transactional(readOnly = true)
     public TelegramBotAccount resolveAccount(String clientCode) {
         if (StringUtils.hasText(clientCode)) {
-            return repository.findByClientCodeIgnoreCaseAndActiveTrue(clientCode.trim())
+            TelegramBotAccount account = repository.findByClientCodeIgnoreCaseAndActiveTrue(clientCode.trim())
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Active telegram bot account not found for client code: " + clientCode));
+            companyScope.assertCanAccess(account.getCompany());
+            return account;
+        }
+        Long companyId = companyScope.filterCompanyId();
+        if (companyId != null) {
+            return repository.findByCompanyIdAndIsDefaultTrueAndActiveTrue(companyId)
+                    .or(() -> repository.findFirstByCompanyIdAndActiveTrueOrderByIdAsc(companyId))
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            "No active telegram bot account configured for the company of this caller"));
         }
         return repository.findByIsDefaultTrueAndActiveTrue()
                 .or(repository::findFirstByActiveTrueOrderByIdAsc)
@@ -46,9 +64,11 @@ public class TelegramBotAccountService {
         return repository.existsActiveWithWebhookSecret();
     }
 
+    /** Administración: el ADMIN de una empresa sólo ve los bots de la suya. */
     @Transactional(readOnly = true)
     public List<TelegramBotAccount> listAll() {
-        return repository.findAll();
+        Long companyId = companyScope.filterCompanyId();
+        return companyId == null ? repository.findAll() : repository.findAllByCompanyId(companyId);
     }
 
     @Transactional(readOnly = true)
@@ -58,15 +78,22 @@ public class TelegramBotAccountService {
 
     @Transactional(readOnly = true)
     public TelegramBotAccount getById(Long id) {
-        return repository.findById(id)
+        TelegramBotAccount account = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Telegram bot account not found with id=" + id));
+        companyScope.assertCanAccess(account.getCompany());
+        return account;
     }
 
     @Transactional
-    public TelegramBotAccount save(TelegramBotAccount account) {
+    public TelegramBotAccount save(TelegramBotAccount account, Long requestedCompanyId) {
         if (account.getId() == null && repository.existsByClientCodeIgnoreCase(account.getClientCode())) {
             throw new IllegalArgumentException(
                     "Telegram bot account already exists for clientCode: " + account.getClientCode());
+        }
+        account.setCompany(companyScope.resolveOwner(requestedCompanyId));
+        if (account.isDefault() && !companyScope.unrestricted()) {
+            // El bot por defecto es global: lo usa el envío sin clientCode y el webhook sin secret.
+            throw new AccessDeniedException("Only a SUPER_ADMIN can set the global default telegram bot account");
         }
         if (account.isDefault()) {
             clearPreviousDefault(account);

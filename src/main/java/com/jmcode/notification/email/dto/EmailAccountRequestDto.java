@@ -10,6 +10,8 @@ import jakarta.validation.constraints.Size;
 
 public record EmailAccountRequestDto(
         @NotBlank @Size(max = 64) String clientCode,
+        /** Empresa propietaria. Obligatorio para SUPER_ADMIN; el ADMIN de empresa usa siempre la suya. */
+        Long companyId,
         @Size(max = 128) String name,
         @NotBlank @Size(max = 255) String host,
         @Min(1) @Max(65535) int port,

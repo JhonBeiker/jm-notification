@@ -1,7 +1,11 @@
 package com.jmcode.notification.security;
 
+import com.jmcode.notification.company.Company;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,7 +24,8 @@ import java.time.Instant;
         name = "api_clients",
         indexes = {
                 @Index(name = "idx_api_client_prefix", columnList = "api_key_prefix"),
-                @Index(name = "idx_api_client_active", columnList = "active")
+                @Index(name = "idx_api_client_active", columnList = "active"),
+                @Index(name = "idx_api_client_company", columnList = "company_id")
         }
 )
 @Getter
@@ -31,6 +36,14 @@ public class ApiClient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /**
+     * Empresa dueña de la clave: acota los envíos a las cuentas de esa empresa.
+     * Sólo es {@code null} en claves anteriores a las empresas, que siguen sin acotar.
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @Column(nullable = false, length = 128)
     private String name;

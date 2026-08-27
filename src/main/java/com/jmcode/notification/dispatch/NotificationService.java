@@ -9,6 +9,7 @@ import com.jmcode.notification.common.ChannelNotFoundException;
 import com.jmcode.notification.common.NotificationSendException;
 import com.jmcode.notification.dispatch.dto.BulkNotificationRequestDto;
 import com.jmcode.notification.dispatch.dto.NotificationRequestDto;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;
@@ -70,6 +71,10 @@ public class NotificationService {
         } catch (NotificationSendException ex) {
             return ex.getResult();
         } catch (ChannelNotFoundException ex) {
+            return NotificationResult.failed(dto.channel(), dto.to(), ex.getMessage());
+        } catch (AccessDeniedException ex) {
+            // En un envío suelto esto sale como 403; dentro del lote es un elemento fallido
+            // más, para no tumbar el resto por un clientCode que no es de esta API Key.
             return NotificationResult.failed(dto.channel(), dto.to(), ex.getMessage());
         }
     }
