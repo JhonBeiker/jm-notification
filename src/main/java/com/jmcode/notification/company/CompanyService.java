@@ -6,6 +6,7 @@ import com.jmcode.notification.email.EmailTemplateRepository;
 import com.jmcode.notification.security.AdminUserRepository;
 import com.jmcode.notification.security.ApiClientRepository;
 import com.jmcode.notification.telegram.TelegramBotAccountRepository;
+import com.jmcode.notification.whatsapp.WhatsAppDeviceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class CompanyService {
     private final EmailAccountRepository emailAccountRepository;
     private final EmailTemplateRepository emailTemplateRepository;
     private final TelegramBotAccountRepository telegramBotAccountRepository;
+    private final WhatsAppDeviceRepository whatsAppDeviceRepository;
 
     @Transactional(readOnly = true)
     public List<Company> listAll() {
@@ -64,12 +66,14 @@ public class CompanyService {
         long emailAccounts = emailAccountRepository.countByCompanyId(id);
         long templates = emailTemplateRepository.countByCompanyId(id);
         long bots = telegramBotAccountRepository.countByCompanyId(id);
+        long whatsAppDevices = whatsAppDeviceRepository.countByCompanyId(id);
         long apiClients = apiClientRepository.countByCompanyId(id);
-        if (users + emailAccounts + templates + bots + apiClients > 0) {
+        if (users + emailAccounts + templates + bots + whatsAppDevices + apiClients > 0) {
             throw new ConflictException(("Company '%s' still has %d admin user(s), %d email account(s), "
-                    + "%d email template(s), %d telegram bot account(s) and %d api client(s). "
-                    + "Delete them first or deactivate the company.")
-                    .formatted(company.getCode(), users, emailAccounts, templates, bots, apiClients));
+                    + "%d email template(s), %d telegram bot account(s), %d whatsapp device(s) "
+                    + "and %d api client(s). Delete them first or deactivate the company.")
+                    .formatted(company.getCode(), users, emailAccounts, templates, bots,
+                            whatsAppDevices, apiClients));
         }
         repository.delete(company);
     }

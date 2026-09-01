@@ -3,6 +3,7 @@ package com.jmcode.notification.config;
 import com.jmcode.notification.email.EmailAccountRepository;
 import com.jmcode.notification.security.ApiClientRepository;
 import com.jmcode.notification.telegram.TelegramBotAccountRepository;
+import com.jmcode.notification.whatsapp.WhatsAppDeviceRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ public class StartupConfigurationReport implements ApplicationRunner {
     private final NotificationProperties properties;
     private final EmailAccountRepository emailAccountRepository;
     private final TelegramBotAccountRepository telegramBotAccountRepository;
+    private final WhatsAppDeviceRepository whatsAppDeviceRepository;
     private final ApiClientRepository apiClientRepository;
 
     @Override
@@ -62,8 +64,16 @@ public class StartupConfigurationReport implements ApplicationRunner {
         }
 
         if (properties.whatsapp().enabled()) {
-            log.info("WHATSAPP channel enabled (phoneNumberId configured: {})",
-                    !properties.whatsapp().phoneNumberId().isBlank());
+            long devices = whatsAppDeviceRepository.countByActiveTrue();
+            if (devices == 0) {
+                log.warn("WHATSAPP channel enabled but no active GOWA device exists. "
+                        + "Create one with POST /api/v1/admin/whatsapp-devices");
+            } else {
+                log.info("WHATSAPP channel enabled with {} active GOWA device(s), default instance: {}",
+                        devices, properties.whatsapp().apiUrl().isBlank()
+                                ? "(none: each device must set its own apiUrl)"
+                                : properties.whatsapp().apiUrl());
+            }
         } else {
             log.info("WHATSAPP channel disabled (notification.whatsapp.enabled=false)");
         }

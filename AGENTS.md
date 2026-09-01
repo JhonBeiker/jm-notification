@@ -5,7 +5,7 @@
 - Starters: webmvc, security, data-jpa, mail, validation, actuator, **restclient** (en Boot 4 el `RestClient.Builder` no lo trae el starter web).
 - Maven (wrapper: `mvnw` / `mvnw.cmd`).
 - Postgres por defecto; H2 sólo con scope `test`. JPA `ddl-auto: update` (sin Flyway/Liquibase).
-- `spring-dotenv` 4.0.0 — env vars auto-cargadas desde `.env` en la raíz.
+- `.env` en la raíz, cargado con `spring.config.import: optional:file:.env[.properties]` (no con `spring-dotenv`: se registra por `META-INF/spring.factories`, que Spring Boot 4 ya no lee).
 - **Jackson 3** (`tools.jackson.*`) es el mapper de la aplicación. Jackson 2 sólo entra como transitiva de springdoc: no lo uses para databind.
 
 ## Setup
@@ -66,7 +66,7 @@ Canal nuevo: implementa `NotificationChannel`, anótalo `@Component` y añade la
 - Un `clientCode` de otra empresa sale como **403**: los canales relanzan `AccessDeniedException` en vez de convertirla en `FAILED` (un 502 culparía al proveedor), y `sendBulk` la captura por elemento para no tumbar el lote.
 - `isDefault` de una cuenta o un bot es **global** (es lo que resuelve un envío sin `clientCode`): sólo lo marca el SUPER_ADMIN.
 - Desactivar la empresa deja fuera del login a sus administradores sin tocar cada usuario.
-- `ApiClient`: clave `jmk_<43 url-safe>`, hash SHA-256; el valor en claro sólo se devuelve al crear o rotar. Pertenece a una empresa y sólo puede enviar por sus cuentas: un `clientCode` ajeno da **403**, y sin `clientCode` se resuelve la cuenta por defecto **de esa empresa**. Las claves anteriores a las empresas (sin `company_id`) siguen sin acotar y se avisan con WARN al arrancar. WhatsApp no tiene cuenta por empresa (config global), así que no se acota.
+- `ApiClient`: clave `jmk_<43 url-safe>`, hash SHA-256; el valor en claro sólo se devuelve al crear o rotar. Pertenece a una empresa y sólo puede enviar por sus cuentas: un `clientCode` ajeno da **403**, y sin `clientCode` se resuelve la cuenta por defecto **de esa empresa**. Las claves anteriores a las empresas (sin `company_id`) siguen sin acotar y se avisan con WARN al arrancar. WhatsApp también se acota: cada dispositivo GOWA pertenece a una empresa.
 - JWT HS256 firmado con `JWT_SECRET`. Claims: `sub`, `email`, `role` y `cid` (id de empresa, ausente para SUPER_ADMIN).
 - `SecurityConfig` termina en `anyRequest().authenticated()`: un endpoint nuevo nace cerrado. Públicos: health/info, swagger, `/error` y `POST /api/v1/telegram/webhook`.
 - La consola H2 tiene su propia cadena `@Order(1)`, activa sólo si `spring.h2.console.enabled=true`.
