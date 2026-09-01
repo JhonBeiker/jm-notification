@@ -28,9 +28,9 @@ cp .env.example .env   # o copia manual en Windows
 | Variable | Descripción | Default |
 |---|---|---|
 | `SERVER_PORT` | Puerto HTTP | `8050` |
-| `DB_URL` | JDBC URL (el driver se deriva de ella) | `jdbc:postgresql://localhost:5433/jm_notification` |
-| `DB_USER` | Usuario BD | `postgres` |
-| `DB_PASSWORD` | Password BD | `postgres` |
+| `DB_URL` | JDBC URL (el driver se deriva de ella) | **obligatoria** |
+| `DB_USER` | Usuario BD | **obligatoria** |
+| `DB_PASSWORD` | Password BD | **obligatoria** |
 | `JPA_DDL_AUTO` | Estrategia de esquema JPA | `update` |
 | `H2_CONSOLE_ENABLED` | Consola H2 en `/h2-console` | `false` |
 | `HTTP_CONNECT_TIMEOUT` | Timeout de conexión saliente | `5s` |

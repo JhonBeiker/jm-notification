@@ -9,9 +9,9 @@ spring:
   datasource:
     # El driver se deriva de la URL: así el mismo YAML sirve para Postgres y para H2
     # (los tests apuntan a H2 en memoria sobreescribiendo sólo esta propiedad).
-    url: ${DB_URL:jdbc:postgresql://localhost:5433/jm_notification}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: ${JPA_DDL_AUTO:update}

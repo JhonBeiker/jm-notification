@@ -25,7 +25,7 @@ Swagger UI at `/swagger-ui.html`, OpenAPI at `/v3/api-docs`, health at `/actuato
    reads, so the whole `.env` was being ignored in silence — every `${VAR:default}` quietly fell
    back to its default (including `DB_URL`, which is why the app still started). The dependency is
    gone. A `.env` value is read as a `.properties` value: `\` escapes, so avoid backslashes.
-2. **`application.yml`** defaults to Postgres (`localhost:5433`). The JDBC driver is *derived from the URL*, so pointing `DB_URL` at H2 is enough to switch (this is what the tests do).
+2. **`application.yml`** carries **no** connection defaults: `DB_URL` / `DB_USER` / `DB_PASSWORD` have no fallback, so an unset one binds as the literal `${DB_URL}` (Boot binds config properties leniently) and fails at connect time, not at startup. The JDBC driver is *derived from the URL*, so pointing `DB_URL` at H2 is enough to switch (this is what the tests do — they override `spring.datasource.url` only, and H2 accepts the unresolved user/password).
 3. **Database rows** are the runtime config for SMTP accounts and Telegram bots. The `TELEGRAM_*` / `MAIL_*` env vars are legacy fallbacks.
 
 Schema is managed by JPA `ddl-auto: update` — no Flyway/Liquibase, so entity changes migrate implicitly.
