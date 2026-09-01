@@ -1,12 +1,17 @@
 spring:
   application:
     name: jm-notification
+  config:
+    # Carga el .env como properties. Antes lo hacía spring-dotenv, que se registra vía
+    # META-INF/spring.factories: Spring Boot 4 ya no lee ese fichero, así que el .env se
+    # ignoraba en silencio y toda la configuración caía a los defaults de este YAML.
+    import: optional:file:.env[.properties]
   datasource:
     # El driver se deriva de la URL: así el mismo YAML sirve para Postgres y para H2
     # (los tests apuntan a H2 en memoria sobreescribiendo sólo esta propiedad).
-    url: ${DB_URL:}
-    username: ${DB_USER:}
-    password: ${DB_PASSWORD:}
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/jm_notification}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
   jpa:
     hibernate:
       ddl-auto: ${JPA_DDL_AUTO:update}
@@ -52,10 +57,11 @@ notification:
     from: ${MAIL_FROM:}
     password-encryption-key: ${EMAIL_PASSWORD_ENCRYPTION_KEY:}
   whatsapp:
+    # Instancia GOWA por defecto: cada dispositivo puede sobrescribir url y credenciales.
     enabled: ${NOTIFICATION_WHATSAPP_ENABLED:false}
-    api-url: ${WHATSAPP_API_URL:https://graph.facebook.com/v21.0}
-    phone-number-id: ${WHATSAPP_PHONE_NUMBER_ID:}
-    access-token: ${WHATSAPP_ACCESS_TOKEN:}
+    api-url: ${GOWA_API_URL:}
+    basic-auth-user: ${GOWA_BASIC_AUTH_USER:}
+    basic-auth-password: ${GOWA_BASIC_AUTH_PASSWORD:}
   telegram:
     enabled: ${NOTIFICATION_TELEGRAM_ENABLED:false}
     api-url: ${TELEGRAM_API_URL:https://api.telegram.org}

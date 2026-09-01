@@ -18,7 +18,13 @@ Swagger UI at `/swagger-ui.html`, OpenAPI at `/v3/api-docs`, health at `/actuato
 
 ## Configuration layering
 
-1. **`.env`** (gitignored, loaded by `spring-dotenv`) → `application.yml` `${VAR:default}` placeholders → the `NotificationProperties` / `AuthProperties` records.
+1. **`.env`** (gitignored) → `application.yml` `${VAR:default}` placeholders → the
+   `NotificationProperties` / `AuthProperties` records. It is loaded by
+   `spring.config.import: optional:file:.env[.properties]`, **not** by `spring-dotenv`: that
+   library registers itself through `META-INF/spring.factories`, which Spring Boot 4 no longer
+   reads, so the whole `.env` was being ignored in silence — every `${VAR:default}` quietly fell
+   back to its default (including `DB_URL`, which is why the app still started). The dependency is
+   gone. A `.env` value is read as a `.properties` value: `\` escapes, so avoid backslashes.
 2. **`application.yml`** defaults to Postgres (`localhost:5433`). The JDBC driver is *derived from the URL*, so pointing `DB_URL` at H2 is enough to switch (this is what the tests do).
 3. **Database rows** are the runtime config for SMTP accounts and Telegram bots. The `TELEGRAM_*` / `MAIL_*` env vars are legacy fallbacks.
 
@@ -41,7 +47,8 @@ com.jmcode.notification
 ├── email/        EmailAccount*, EmailTemplate*, EmailNotificationChannel,
 │                 PasswordEncryptor, admin controllers, dto
 ├── telegram/     bot accounts, subscribers, webhook, bot client, channel, dto
-├── whatsapp/     WhatsAppNotificationChannel
+├── whatsapp/     WhatsAppDevice* (dispositivos GOWA), GowaClient,
+│                 WhatsAppNotificationChannel, admin controller, dto
 └── security/     JWT + API key auth, admin users, api clients, SecurityConfig
 ```
 
@@ -71,8 +78,7 @@ and, with no `clientCode`, resolves that company's default instead of the global
 gets a company — a company ADMIN's own, or the `companyId` a SUPER_ADMIN passes; creating one with
 neither is a 400, since an unscoped key could send through any account. Only pre-existing keys have
 no company, and those stay unscoped for compatibility — `StartupConfigurationReport` WARNs about them
-at boot. Key names are unique per company, not globally. WhatsApp has no per-company account (it is
-global env config), so it is not scoped.
+at boot. Key names are unique per company, not globally.
 
 `CompanyScope` is the single place that decides what a request may touch: `filterCompanyId()` for
 listings, `assertCanAccess(company)` for reads/sends (403 on another company's row), and
@@ -111,6 +117,42 @@ Two filters run before `UsernamePasswordAuthenticationFilter`, each registered a
 `POST /api/v1/telegram/webhook` identifies the bot by matching `X-Telegram-Bot-Api-Secret-Token` against active accounts. If *any* active account defines a secret, an unknown or missing secret is rejected with 401; the fallback to the default account only applies while no account has a secret configured.
 
 `/start` creates or reactivates a `TelegramSubscriber` (binding the deep-link payload to `externalUserId`); `/stop` and any blocked/deactivated/forbidden/chat-not-found provider error flips `active=false`. Outbound `to` is a numeric `chat_id` or a linked `externalUserId`.
+
+### WhatsApp via GOWA (`whatsapp/`)
+WhatsApp goes through a self-hosted
+[go-whatsapp-web-multidevice](https://github.com/aldinokemal/go-whatsapp-web-multidevice) (GOWA)
+instance. Two earlier implementations were replaced: the Meta Cloud API, and then Waxum (its server
+kept falling over). `WhatsAppDevice` is the per-client row — the WhatsApp twin of
+`TelegramBotAccount`: `clientCode`, the `deviceId` *inside GOWA*, an optional
+`apiUrl`/`basicAuthUser`/`basicAuthPassword` override, and `company_id`. Resolution, caching and the
+default rule are the Telegram ones (`resolveDevice(clientCode)`, `WhatsAppDeviceManager` keyed by
+`clientCode` and versioned by `updatedAt`, global `isDefault` only settable by a SUPER_ADMIN).
+
+GOWA guards the whole instance with **Basic Auth** (`APP_BASIC_AUTH`) and picks the account with the
+`X-Device-Id` header; every response is wrapped in `{code, message, results}` and `GowaClient`
+returns `results` already unwrapped. `GOWA_API_URL` / `GOWA_BASIC_AUTH_USER` / `GOWA_BASIC_AUTH_PASSWORD`
+are the fallback instance; a row's own password is AES-GCM encrypted through the shared
+`PasswordEncryptor` (unlike Telegram tokens, which stay plaintext). An instance with no Basic Auth is
+valid — the header is simply omitted.
+
+**GOWA assigns the `deviceId`**, so creating a row calls `POST /devices` and stores the UUID it
+returns, rolling the row back on a 502. A request *may* carry a `deviceId` to **adopt** a device
+that already exists there (one already paired comes in as `logged_in`, no QR needed): that path
+verifies it with `GET /devices/{id}` and copies its state. GOWA answers `500 device X not found`
+for an unknown id — translated to a 404, since it is not an outage — and a `deviceId` already
+linked to another row is a 400, because two clients on one device would cross messages. Pairing lives in GOWA, so
+`/api/v1/admin/whatsapp-devices/{id}` exposes `qr` (`GET /app/login` → a `qr_link` PNG the instance
+serves *without* Basic Auth, valid ~30s), `pair` (`GET /app/login-with-code`, an 8-char code),
+`status` / `reconnect` (`GET /devices/{id}`, `GET /app/reconnect`), `logout` and `unregister`;
+`status` and `reconnect` write the reported `state`/`jid` back onto the row (the phone number is the
+JID's local part). `login-with-code` only accepts the device through the header, not as a path
+segment, so every per-device call goes through `X-Device-Id`.
+
+Until a device is paired GOWA answers sends with `401 you are not logged in`; that reaches the
+caller as a FAILED result carrying the provider's own message. A Waxum-era detail that still holds:
+a provider HTTP error becomes `UpstreamServiceException` (which carries the provider status code) →
+**502**, while a cross-company `clientCode` still surfaces as 403. Sending is text-only for now —
+GOWA has `/send/file`, `/send/image` etc., they just aren't wired to `Attachment` yet.
 
 ### Email rendering
 Templates are managed through `/api/v1/admin/email-templates` (`EmailTemplateService`), unique by

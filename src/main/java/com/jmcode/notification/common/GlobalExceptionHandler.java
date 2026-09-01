@@ -52,8 +52,13 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNAUTHORIZED, "Unauthorized", ex.getMessage(), request);
     }
 
+    /**
+     * Al cliente se le dice sólo "Access denied" (el motivo revela datos de otras empresas),
+     * pero sin registrarlo era imposible saber cuál de las reglas de {@code CompanyScope} saltó.
+     */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        log.warn("Access denied on {} {}: {}", request.getMethod(), request.getRequestURI(), ex.getMessage());
         return build(HttpStatus.FORBIDDEN, "Forbidden", "Access denied", request);
     }
 
@@ -92,6 +97,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleIllegalState(IllegalStateException ex, HttpServletRequest request) {
         log.error("Service in invalid state handling {}", request.getRequestURI(), ex);
         return build(HttpStatus.SERVICE_UNAVAILABLE, "Service Unavailable", ex.getMessage(), request);
+    }
+
+    /** Fallo de un proveedor externo (GOWA, ...): no es culpa de esta API ni del cliente. */
+    @ExceptionHandler(UpstreamServiceException.class)
+    public ResponseEntity<ApiError> handleUpstream(UpstreamServiceException ex, HttpServletRequest request) {
+        log.error("Upstream provider '{}' failed handling {}", ex.getProvider(), request.getRequestURI(), ex);
+        return build(HttpStatus.BAD_GATEWAY, "Bad Gateway", ex.getMessage(), request);
     }
 
     @ExceptionHandler(NotificationSendException.class)

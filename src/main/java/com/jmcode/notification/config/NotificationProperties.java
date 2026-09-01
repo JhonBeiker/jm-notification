@@ -20,11 +20,18 @@ public record NotificationProperties(
     ) {
     }
 
+    /**
+     * Instancia GOWA (go-whatsapp-web-multidevice) por defecto. Cada fila
+     * {@code whatsapp_devices} puede traer su propia URL y sus credenciales; cuando no lo
+     * hace, usa estas.
+     */
     public record WhatsApp(
             @DefaultValue("false") boolean enabled,
-            @DefaultValue("https://graph.facebook.com/v21.0") String apiUrl,
-            @DefaultValue("") String phoneNumberId,
-            @DefaultValue("") String accessToken
+            /** Base URL de la instancia GOWA, sin path. */
+            @DefaultValue("") String apiUrl,
+            /** Usuario de Basic Auth ({@code APP_BASIC_AUTH}); vacío si la instancia no la exige. */
+            @DefaultValue("") String basicAuthUser,
+            @DefaultValue("") String basicAuthPassword
     ) {
     }
 
