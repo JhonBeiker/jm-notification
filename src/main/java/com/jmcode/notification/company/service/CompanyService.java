@@ -3,39 +3,18 @@ package com.jmcode.notification.company.service;
 import com.jmcode.notification.company.entity.Company;
 import com.jmcode.notification.company.repository.CompanyRepository;
 import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.company.repository.CompanyRepository;
+import com.jmcode.notification.dispatch.repository.NotificationLogRepository;
 import com.jmcode.notification.email.repository.EmailAccountRepository;
-import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.company.repository.CompanyRepository;
 import com.jmcode.notification.email.repository.EmailTemplateRepository;
-import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.company.repository.CompanyRepository;
 import com.jmcode.notification.security.repository.AdminUserRepository;
-import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.company.repository.CompanyRepository;
 import com.jmcode.notification.security.repository.ApiClientRepository;
-import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.company.repository.CompanyRepository;
 import com.jmcode.notification.telegram.repository.TelegramBotAccountRepository;
-import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.company.repository.CompanyRepository;
 import com.jmcode.notification.whatsapp.repository.WhatsAppDeviceRepository;
-import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.company.repository.CompanyRepository;
 import jakarta.persistence.EntityNotFoundException;
-import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.company.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
-import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.company.repository.CompanyRepository;
 import org.springframework.stereotype.Service;
-import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.company.repository.CompanyRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.company.repository.CompanyRepository;
 import java.util.List;
 
 @Service
@@ -49,6 +28,7 @@ public class CompanyService {
     private final EmailTemplateRepository emailTemplateRepository;
     private final TelegramBotAccountRepository telegramBotAccountRepository;
     private final WhatsAppDeviceRepository whatsAppDeviceRepository;
+    private final NotificationLogRepository notificationLogRepository;
 
     @Transactional(readOnly = true)
     public List<Company> listAll() {
@@ -92,12 +72,13 @@ public class CompanyService {
         long bots = telegramBotAccountRepository.countByCompanyId(id);
         long whatsAppDevices = whatsAppDeviceRepository.countByCompanyId(id);
         long apiClients = apiClientRepository.countByCompanyId(id);
-        if (users + emailAccounts + templates + bots + whatsAppDevices + apiClients > 0) {
+        long notifications = notificationLogRepository.countByCompanyId(id);
+        if (users + emailAccounts + templates + bots + whatsAppDevices + apiClients + notifications > 0) {
             throw new ConflictException(("Company '%s' still has %d admin user(s), %d email account(s), "
-                    + "%d email template(s), %d telegram bot account(s), %d whatsapp device(s) "
-                    + "and %d api client(s). Delete them first or deactivate the company.")
+                    + "%d email template(s), %d telegram bot account(s), %d whatsapp device(s), "
+                    + "%d api client(s) and %d notification(s). Delete them first or deactivate the company.")
                     .formatted(company.getCode(), users, emailAccounts, templates, bots,
-                            whatsAppDevices, apiClients));
+                            whatsAppDevices, apiClients, notifications));
         }
         repository.delete(company);
     }
