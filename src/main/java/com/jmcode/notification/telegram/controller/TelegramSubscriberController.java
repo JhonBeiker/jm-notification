@@ -1,0 +1,80 @@
+package com.jmcode.notification.telegram.controller;
+
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import com.jmcode.notification.telegram.dto.LinkExternalUserRequestDto;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import com.jmcode.notification.telegram.dto.TelegramSubscriberResponseDto;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import io.swagger.v3.oas.annotations.Operation;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import jakarta.validation.Valid;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import lombok.RequiredArgsConstructor;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import org.springframework.web.bind.annotation.GetMapping;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import org.springframework.web.bind.annotation.PathVariable;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import org.springframework.web.bind.annotation.PutMapping;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import org.springframework.web.bind.annotation.RequestBody;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import org.springframework.web.bind.annotation.RequestMapping;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
+import com.jmcode.notification.telegram.service.TelegramSubscriberService;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/telegram/subscribers")
+@Tag(name = "Telegram Subscribers", description = "Usuarios que iniciaron el bot y pueden recibir mensajes")
+@SecurityRequirement(name = "adminJwt")
+@RequiredArgsConstructor
+public class TelegramSubscriberController {
+
+    private final TelegramSubscriberService subscriberService;
+
+    @GetMapping
+    @Operation(summary = "Listar suscriptores", description = "Por defecto solo activos. Usa activeOnly=false para todos.")
+    public List<TelegramSubscriberResponseDto> list(
+            @RequestParam(name = "activeOnly", defaultValue = "true") boolean activeOnly
+    ) {
+        List<TelegramSubscriber> subscribers = activeOnly ? subscriberService.listActive() : subscriberService.listAll();
+        return subscribers.stream().map(TelegramSubscriberResponseDto::from).toList();
+    }
+
+    @GetMapping("/{chatId}")
+    @Operation(summary = "Obtener suscriptor por chat_id")
+    public TelegramSubscriberResponseDto getByChatId(@PathVariable Long chatId) {
+        return TelegramSubscriberResponseDto.from(subscriberService.getByChatId(chatId));
+    }
+
+    @PutMapping("/link")
+    @Operation(summary = "Vincular externalUserId", description = "Asocia un id de tu sistema al chat_id de Telegram.")
+    public TelegramSubscriberResponseDto link(@Valid @RequestBody LinkExternalUserRequestDto request) {
+        return TelegramSubscriberResponseDto.from(
+                subscriberService.linkExternalUser(request.chatId(), request.externalUserId()));
+    }
+}

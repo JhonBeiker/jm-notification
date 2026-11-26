@@ -1,0 +1,100 @@
+package com.jmcode.notification.telegram.controller;
+
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import com.jmcode.notification.telegram.dto.TelegramBotAccountRequestDto;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import com.jmcode.notification.telegram.dto.TelegramBotAccountResponseDto;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import io.swagger.v3.oas.annotations.Operation;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import lombok.RequiredArgsConstructor;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import jakarta.validation.Valid;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import org.springframework.http.HttpStatus;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import org.springframework.web.bind.annotation.GetMapping;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import org.springframework.web.bind.annotation.PathVariable;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import org.springframework.web.bind.annotation.PostMapping;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import org.springframework.web.bind.annotation.PutMapping;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import org.springframework.web.bind.annotation.RequestBody;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import org.springframework.web.bind.annotation.RequestMapping;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
+import com.jmcode.notification.telegram.service.TelegramBotAccountService;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/admin/telegram-bot-accounts")
+@Tag(name = "Telegram Bot Accounts",
+        description = "Bots de Telegram por cliente. El ADMIN de una empresa sólo ve y edita los suyos")
+@SecurityRequirement(name = "adminJwt")
+@RequiredArgsConstructor
+public class TelegramBotAccountAdminController {
+
+    private final TelegramBotAccountService accountService;
+
+    @GetMapping
+    @Operation(summary = "Listar cuentas de bots de Telegram")
+    public List<TelegramBotAccountResponseDto> list() {
+        return accountService.listAll().stream().map(TelegramBotAccountResponseDto::from).toList();
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Obtener cuenta por ID")
+    public TelegramBotAccountResponseDto getById(@PathVariable Long id) {
+        return TelegramBotAccountResponseDto.from(accountService.getById(id));
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Crear cuenta de bot de Telegram para un cliente")
+    public TelegramBotAccountResponseDto create(@Valid @RequestBody TelegramBotAccountRequestDto dto) {
+        return TelegramBotAccountResponseDto.from(accountService.save(dto.applyTo(new TelegramBotAccount()), dto.companyId()));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar cuenta de bot de Telegram")
+    public TelegramBotAccountResponseDto update(@PathVariable Long id, @Valid @RequestBody TelegramBotAccountRequestDto dto) {
+        return TelegramBotAccountResponseDto.from(accountService.save(dto.applyTo(accountService.getById(id)), dto.companyId()));
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Eliminar cuenta de bot de Telegram")
+    public void delete(@PathVariable Long id) {
+        accountService.delete(id);
+    }
+}

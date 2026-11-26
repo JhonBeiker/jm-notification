@@ -1,6 +1,6 @@
 package com.jmcode.notification.whatsapp.dto;
 
-import com.jmcode.notification.whatsapp.WhatsAppDevice;
+import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;

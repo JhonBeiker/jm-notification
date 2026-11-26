@@ -1,9 +1,9 @@
 package com.jmcode.notification.config;
 
-import com.jmcode.notification.email.EmailAccountRepository;
-import com.jmcode.notification.security.ApiClientRepository;
-import com.jmcode.notification.telegram.TelegramBotAccountRepository;
-import com.jmcode.notification.whatsapp.WhatsAppDeviceRepository;
+import com.jmcode.notification.email.repository.EmailAccountRepository;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.telegram.repository.TelegramBotAccountRepository;
+import com.jmcode.notification.whatsapp.repository.WhatsAppDeviceRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,6 @@
 package com.jmcode.notification.email.dto;
 
-import com.jmcode.notification.email.EmailTemplate;
+import com.jmcode.notification.email.entity.EmailTemplate;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

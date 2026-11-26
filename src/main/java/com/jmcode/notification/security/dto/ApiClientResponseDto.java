@@ -1,6 +1,6 @@
 package com.jmcode.notification.security.dto;
 
-import com.jmcode.notification.security.ApiClient;
+import com.jmcode.notification.security.entity.ApiClient;
 
 import java.time.Instant;
 

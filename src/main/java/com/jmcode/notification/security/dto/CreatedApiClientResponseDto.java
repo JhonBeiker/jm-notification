@@ -1,6 +1,6 @@
 package com.jmcode.notification.security.dto;
 
-import com.jmcode.notification.security.ApiClient;
+import com.jmcode.notification.security.entity.ApiClient;
 
 public record CreatedApiClientResponseDto(ApiClientResponseDto client, String apiKey) {
     public static CreatedApiClientResponseDto from(ApiClient client, String plainKey) {

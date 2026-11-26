@@ -1,6 +1,6 @@
 package com.jmcode.notification.company.dto;
 
-import com.jmcode.notification.company.Company;
+import com.jmcode.notification.company.entity.Company;
 
 import java.time.Instant;
 

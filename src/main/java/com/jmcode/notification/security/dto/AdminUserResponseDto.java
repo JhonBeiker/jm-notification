@@ -1,6 +1,6 @@
 package com.jmcode.notification.security.dto;
 
-import com.jmcode.notification.security.AdminUser;
+import com.jmcode.notification.security.entity.AdminUser;
 
 import java.time.Instant;
 

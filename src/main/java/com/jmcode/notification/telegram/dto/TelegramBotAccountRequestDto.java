@@ -1,6 +1,6 @@
 package com.jmcode.notification.telegram.dto;
 
-import com.jmcode.notification.telegram.TelegramBotAccount;
+import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
