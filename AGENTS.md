@@ -22,14 +22,15 @@
 - Telegram sólo entrega a suscriptores activos (los que enviaron `/start`); un 403/blocked marca al suscriptor como inactivo.
 - Timeouts HTTP salientes: `spring.http.clients.connect-timeout` / `read-timeout` (nombre en **plural**), sólo aplican al `RestClient.Builder` autoconfigurado.
 
-## Estructura (`com.jmcode.notification`) — package by feature
-- `channel/` — contrato compartido: `NotificationChannel` (SPI) + modelo (`ChannelType`, `NotificationRequest/Result/Status`, `Attachment`).
-- `common/` — `ApiError`, `GlobalExceptionHandler` y las excepciones. Los servicios no dependen de la capa web.
-- `company/` — `Company` (la empresa cliente) y `CompanyScope`, que decide qué filas puede ver o tocar quien llama.
-- `config/` — `NotificationProperties`, `OpenApiConfig`, `StartupConfigurationReport`.
-- `dispatch/` — `NotificationService` + `NotificationController` + dto.
-- `email/`, `telegram/`, `whatsapp/` — cada canal con sus entidades, servicios, controladores y dto.
-- `security/` — filtros JWT y API key, `SecurityConfig`, admin users, api clients.
+## Estructura (`com.jmcode.notification`) — package by feature (con subpaquetes por capa)
+- `channel/` — contrato compartido (plano): `NotificationChannel` (SPI) + modelo (`ChannelType`, `NotificationRequest/Result/Status`, `Attachment`).
+- `common/` — `exception/` (excepciones de dominio/aplicación) y `web/` (`ApiError`, `GlobalExceptionHandler`). Los servicios no dependen de la capa web.
+- `company/` — `controller/`, `dto/`, `entity/` (`Company`), `repository/`, `service/` (`CompanyService`, `CompanyScope`).
+- `config/` — configuración global (plano): `AppConfig`, `NotificationProperties`, `OpenApiConfig`, `StartupConfigurationReport`.
+- `dispatch/` — `controller/`, `dto/`, `service/` (`NotificationService`).
+- `email/`, `telegram/`, `whatsapp/` — cada canal organizado en `channel/`, `controller/`, `dto/`, `entity/`, `repository/`, `service/` (y `client/` en `telegram` y `whatsapp`).
+- `security/` — `config/` (`SecurityConfig`, `AuthProperties`, `AdminUserSeeder`), `controller/`, `dto/`, `entity/` (`AdminUser`, `ApiClient`), `filter/` (JWT y API key), `model/` (`AuthPrincipal`, `Role`), `repository/`, `service/`.
+- `src/test/java` — los tests unitarios espejan los subpaquetes de `src/main/java`; los tests de integración (`*IntegrationTest`) viven en la raíz de su módulo.
 
 Canal nuevo: implementa `NotificationChannel`, anótalo `@Component` y añade la constante en `ChannelType`. `NotificationService` los descubre por inyección y rechaza duplicados del mismo tipo.
 

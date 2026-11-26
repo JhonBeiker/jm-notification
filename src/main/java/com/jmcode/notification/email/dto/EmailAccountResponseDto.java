@@ -1,6 +1,6 @@
 package com.jmcode.notification.email.dto;
 
-import com.jmcode.notification.email.EmailAccount;
+import com.jmcode.notification.email.entity.EmailAccount;
 
 import java.time.Instant;
 

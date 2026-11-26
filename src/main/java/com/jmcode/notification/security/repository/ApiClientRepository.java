@@ -1,0 +1,43 @@
+package com.jmcode.notification.security.repository;
+
+import com.jmcode.notification.security.entity.ApiClient;
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.jmcode.notification.security.entity.ApiClient;
+import org.springframework.data.jpa.repository.Modifying;
+import com.jmcode.notification.security.entity.ApiClient;
+import org.springframework.data.jpa.repository.Query;
+import com.jmcode.notification.security.entity.ApiClient;
+import org.springframework.data.repository.query.Param;
+import com.jmcode.notification.security.entity.ApiClient;
+import org.springframework.stereotype.Repository;
+
+import com.jmcode.notification.security.entity.ApiClient;
+import java.time.Instant;
+import com.jmcode.notification.security.entity.ApiClient;
+import java.util.List;
+import com.jmcode.notification.security.entity.ApiClient;
+import java.util.Optional;
+
+@Repository
+public interface ApiClientRepository extends JpaRepository<ApiClient, Long> {
+
+    Optional<ApiClient> findByApiKeyHash(String apiKeyHash);
+
+    /** El nombre sólo tiene que ser único dentro de la empresa. */
+    boolean existsByCompanyIdAndNameIgnoreCase(Long companyId, String name);
+
+    List<ApiClient> findAllByCompanyId(Long companyId);
+
+    long countByCompanyId(Long companyId);
+
+    /** Claves anteriores a las empresas: siguen pudiendo usar cualquier cuenta. */
+    long countByCompanyIsNull();
+
+    /**
+     * Marca de último uso en un solo UPDATE. La versión anterior cargaba la entidad y la
+     * volvía a guardar (dos consultas más un flush) en <em>cada</em> petición autenticada.
+     */
+    @Modifying(clearAutomatically = true)
+    @Query("update ApiClient c set c.lastUsedAt = :now where c.id = :id")
+    void touchLastUsed(@Param("id") Long id, @Param("now") Instant now);
+}

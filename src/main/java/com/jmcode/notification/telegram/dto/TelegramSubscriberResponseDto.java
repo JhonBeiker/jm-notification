@@ -1,6 +1,6 @@
 package com.jmcode.notification.telegram.dto;
 
-import com.jmcode.notification.telegram.TelegramSubscriber;
+import com.jmcode.notification.telegram.entity.TelegramSubscriber;
 
 import java.time.Instant;
 

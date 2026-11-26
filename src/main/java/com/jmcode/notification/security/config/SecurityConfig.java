@@ -1,0 +1,280 @@
+package com.jmcode.notification.security.config;
+
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import tools.jackson.databind.ObjectMapper;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import jakarta.servlet.http.HttpServletResponse;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.context.annotation.Bean;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.context.annotation.Configuration;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.core.annotation.Order;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.http.HttpMethod;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.http.MediaType;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.security.web.SecurityFilterChain;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import java.io.IOException;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import java.time.Instant;
+import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
+import com.jmcode.notification.security.filter.JwtAuthFilter;
+import com.jmcode.notification.security.model.Role;
+import com.jmcode.notification.security.repository.ApiClientRepository;
+import com.jmcode.notification.security.service.ApiClientService;
+import com.jmcode.notification.security.service.ApiKeyGenerator;
+import com.jmcode.notification.security.service.JwtService;
+import java.util.Map;
+
+@Configuration
+public class SecurityConfig {
+
+    private static final String[] PUBLIC_PATHS = {
+            "/actuator/health", "/actuator/health/**", "/actuator/info",
+            "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
+            "/error"
+    };
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    JwtAuthFilter jwtAuthFilter(JwtService jwtService) {
+        return new JwtAuthFilter(jwtService);
+    }
+
+    @Bean
+    ApiKeyAuthFilter apiKeyAuthFilter(ApiClientRepository repository, ApiKeyGenerator generator, ApiClientService service) {
+        return new ApiKeyAuthFilter(repository, generator, service);
+    }
+
+    /**
+     * Los filtros se registran sólo dentro de la cadena de Spring Security: sin esto el
+     * contenedor de servlets los aplicaría además a todas las peticiones.
+     */
+    @Bean
+    FilterRegistrationBean<JwtAuthFilter> jwtAuthFilterRegistration(JwtAuthFilter filter) {
+        return disabledRegistration(filter);
+    }
+
+    @Bean
+    FilterRegistrationBean<ApiKeyAuthFilter> apiKeyAuthFilterRegistration(ApiKeyAuthFilter filter) {
+        return disabledRegistration(filter);
+    }
+
+    @Bean
+    @Order(2)
+    SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtAuthFilter jwtAuthFilter,
+            ApiKeyAuthFilter apiKeyAuthFilter,
+            ObjectMapper objectMapper
+    ) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(PUBLIC_PATHS).permitAll()
+                        // Telegram entrega los updates sin credenciales: la autenticación
+                        // real es el secret token que valida el propio controlador.
+                        .requestMatchers(HttpMethod.POST, "/api/v1/telegram/webhook").permitAll()
+                        .requestMatchers("/api/v1/admin/auth/login").permitAll()
+                        // Empresas y usuarios administradores son ámbito global.
+                        .requestMatchers("/api/v1/admin/companies/**").hasRole(Role.SUPER_ADMIN.name())
+                        .requestMatchers("/api/v1/admin/users/**").hasRole(Role.SUPER_ADMIN.name())
+                        // Cuentas de correo, bots, plantillas y API Keys: el ADMIN entra, pero
+                        // cada servicio filtra por la empresa del token (ver CompanyScope).
+                        .requestMatchers("/api/v1/admin/**").hasAnyRole(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
+                        .requestMatchers("/api/v1/notifications/**").hasRole("API_CLIENT")
+                        .requestMatchers("/api/v1/telegram/**")
+                            .hasAnyRole(Role.SUPER_ADMIN.name(), Role.ADMIN.name())
+                        // Antes esto era permitAll(): cualquier endpoint nuevo nacía público.
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(handling -> handling
+                        .authenticationEntryPoint((req, res, ex) ->
+                                writeJson(objectMapper, res, HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized",
+                                        "Authentication required", req.getRequestURI()))
+                        .accessDeniedHandler((req, res, ex) ->
+                                writeJson(objectMapper, res, HttpServletResponse.SC_FORBIDDEN, "Forbidden",
+                                        "Access denied", req.getRequestURI()))
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+
+    /**
+     * La consola H2 necesita frames y su propia regla; se activa sólo si está habilitada,
+     * en vez de dejarla abierta permanentemente como antes.
+     */
+    @Bean
+    @Order(1)
+    @ConditionalOnProperty(name = "spring.h2.console.enabled", havingValue = "true")
+    SecurityFilterChain h2ConsoleFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/h2-console/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+        return http.build();
+    }
+
+    private static <T extends jakarta.servlet.Filter> FilterRegistrationBean<T> disabledRegistration(T filter) {
+        FilterRegistrationBean<T> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
+    private static void writeJson(ObjectMapper objectMapper, HttpServletResponse response,
+                                  int status, String error, String message, String path) throws IOException {
+        response.setStatus(status);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        objectMapper.writeValue(response.getWriter(), Map.of(
+                "timestamp", Instant.now().toString(),
+                "status", status,
+                "error", error,
+                "message", message,
+                "path", path));
+    }
+}

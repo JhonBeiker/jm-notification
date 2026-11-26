@@ -1,6 +1,6 @@
 package com.jmcode.notification.config;
 
-import com.jmcode.notification.security.AuthProperties;
+import com.jmcode.notification.security.config.AuthProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 

@@ -1,6 +1,6 @@
 package com.jmcode.notification.company.dto;
 
-import com.jmcode.notification.company.Company;
+import com.jmcode.notification.company.entity.Company;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
