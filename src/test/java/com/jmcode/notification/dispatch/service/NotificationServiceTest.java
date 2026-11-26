@@ -16,10 +16,14 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class NotificationServiceTest {
 
     private NotificationService service;
+    private NotificationLogService logService;
 
     @BeforeEach
     void setUp() {
@@ -42,7 +46,8 @@ class NotificationServiceTest {
                 return NotificationResult.sent(ChannelType.EMAIL, request.to(), "msg-1");
             }
         };
-        service = new NotificationService(List.of(email));
+        logService = mock(NotificationLogService.class);
+        service = new NotificationService(List.of(email), logService);
     }
 
     @Test
@@ -52,6 +57,7 @@ class NotificationServiceTest {
         ));
         assertEquals(NotificationStatus.SENT, result.status());
         assertEquals("msg-1", result.providerMessageId());
+        verify(logService).record(any(NotificationRequest.class), any(NotificationResult.class));
     }
 
     @Test
@@ -60,6 +66,7 @@ class NotificationServiceTest {
                 ChannelType.EMAIL, "fail@example.com", "Hi", "Body", null, Map.of(), null, Map.of(), List.of()
         );
         assertThrows(NotificationSendException.class, () -> service.send(dto));
+        verify(logService).record(any(NotificationRequest.class), any(NotificationResult.class));
     }
 
     @Test

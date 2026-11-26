@@ -25,8 +25,9 @@ import java.util.Map;
 public class NotificationService {
 
     private final Map<ChannelType, NotificationChannel> channels;
+    private final NotificationLogService notificationLogService;
 
-    public NotificationService(List<NotificationChannel> channelList) {
+    public NotificationService(List<NotificationChannel> channelList, NotificationLogService notificationLogService) {
         Map<ChannelType, NotificationChannel> byType = new EnumMap<>(ChannelType.class);
         for (NotificationChannel channel : channelList) {
             NotificationChannel previous = byType.put(channel.supports(), channel);
@@ -36,6 +37,7 @@ public class NotificationService {
             }
         }
         this.channels = Map.copyOf(byType);
+        this.notificationLogService = notificationLogService;
     }
 
     /**
@@ -44,7 +46,9 @@ public class NotificationService {
      */
     public NotificationResult send(NotificationRequestDto dto) {
         NotificationChannel channel = resolve(dto.channel());
-        NotificationResult result = channel.send(dto.toDomain());
+        NotificationRequest request = dto.toDomain();
+        NotificationResult result = channel.send(request);
+        notificationLogService.record(request, result);
         if (result.status() == NotificationStatus.FAILED) {
             throw new NotificationSendException(result);
         }
