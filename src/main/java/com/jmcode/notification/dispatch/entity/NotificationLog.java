@@ -19,6 +19,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
@@ -85,9 +86,11 @@ public class NotificationLog {
     private String payloadJson;
 
     @Column(name = "attempts", nullable = false)
+    @ColumnDefault("0")
     private int attempts = 0;
 
     @Column(name = "max_attempts", nullable = false)
+    @ColumnDefault("1")
     private int maxAttempts = 1;
 
     @Column(name = "next_attempt_at")
