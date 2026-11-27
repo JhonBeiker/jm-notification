@@ -2,12 +2,9 @@ package com.jmcode.notification.email.repository;
 
 import com.jmcode.notification.email.entity.EmailTemplate;
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.jmcode.notification.email.entity.EmailTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.jmcode.notification.email.entity.EmailTemplate;
 import java.util.List;
-import com.jmcode.notification.email.entity.EmailTemplate;
 import java.util.Optional;
 
 @Repository

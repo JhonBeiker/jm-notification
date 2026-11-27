@@ -4,38 +4,14 @@ import com.jmcode.notification.email.entity.EmailAccount;
 import com.jmcode.notification.email.entity.EmailTemplate;
 import com.jmcode.notification.email.repository.EmailTemplateRepository;
 import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.entity.EmailTemplate;
-import com.jmcode.notification.email.repository.EmailTemplateRepository;
 import com.jmcode.notification.company.service.CompanyScope;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.entity.EmailTemplate;
-import com.jmcode.notification.email.repository.EmailTemplateRepository;
 import jakarta.persistence.EntityNotFoundException;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.entity.EmailTemplate;
-import com.jmcode.notification.email.repository.EmailTemplateRepository;
 import lombok.RequiredArgsConstructor;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.entity.EmailTemplate;
-import com.jmcode.notification.email.repository.EmailTemplateRepository;
 import org.springframework.stereotype.Service;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.entity.EmailTemplate;
-import com.jmcode.notification.email.repository.EmailTemplateRepository;
 import org.springframework.transaction.annotation.Transactional;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.entity.EmailTemplate;
-import com.jmcode.notification.email.repository.EmailTemplateRepository;
 import org.springframework.util.StringUtils;
 
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.entity.EmailTemplate;
-import com.jmcode.notification.email.repository.EmailTemplateRepository;
 import java.util.List;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.entity.EmailTemplate;
-import com.jmcode.notification.email.repository.EmailTemplateRepository;
 import java.util.Optional;
 
 @Service

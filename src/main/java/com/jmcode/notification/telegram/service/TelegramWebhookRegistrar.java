@@ -2,22 +2,14 @@ package com.jmcode.notification.telegram.service;
 
 import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import com.jmcode.notification.config.NotificationProperties;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import lombok.RequiredArgsConstructor;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.slf4j.Logger;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.slf4j.LoggerFactory;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.boot.ApplicationArguments;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.boot.ApplicationRunner;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.stereotype.Component;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.util.StringUtils;
 
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import java.util.Map;
 
 /**

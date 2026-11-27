@@ -2,20 +2,13 @@ package com.jmcode.notification.email.service;
 
 import com.jmcode.notification.email.entity.EmailAccount;
 import lombok.RequiredArgsConstructor;
-import com.jmcode.notification.email.entity.EmailAccount;
 import org.springframework.mail.javamail.JavaMailSender;
-import com.jmcode.notification.email.entity.EmailAccount;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import com.jmcode.notification.email.entity.EmailAccount;
 import org.springframework.stereotype.Service;
 
-import com.jmcode.notification.email.entity.EmailAccount;
 import java.time.Instant;
-import com.jmcode.notification.email.entity.EmailAccount;
 import java.util.Map;
-import com.jmcode.notification.email.entity.EmailAccount;
 import java.util.Properties;
-import com.jmcode.notification.email.entity.EmailAccount;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

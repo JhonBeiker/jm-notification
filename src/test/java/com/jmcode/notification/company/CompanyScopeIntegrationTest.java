@@ -2,38 +2,22 @@ package com.jmcode.notification.company;
 
 import com.jmcode.notification.company.entity.Company;
 import com.jayway.jsonpath.JsonPath;
-import com.jmcode.notification.company.entity.Company;
 import com.jmcode.notification.security.filter.ApiKeyAuthFilter;
-import com.jmcode.notification.company.entity.Company;
 import org.junit.jupiter.api.BeforeEach;
-import com.jmcode.notification.company.entity.Company;
 import org.junit.jupiter.api.DisplayName;
-import com.jmcode.notification.company.entity.Company;
 import org.junit.jupiter.api.Test;
-import com.jmcode.notification.company.entity.Company;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.jmcode.notification.company.entity.Company;
 import org.springframework.boot.test.context.SpringBootTest;
-import com.jmcode.notification.company.entity.Company;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import com.jmcode.notification.company.entity.Company;
 import org.springframework.http.HttpHeaders;
-import com.jmcode.notification.company.entity.Company;
 import org.springframework.http.MediaType;
-import com.jmcode.notification.company.entity.Company;
 import org.springframework.test.context.TestPropertySource;
-import com.jmcode.notification.company.entity.Company;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.jmcode.notification.company.entity.Company;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import com.jmcode.notification.company.entity.Company;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import com.jmcode.notification.company.entity.Company;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import com.jmcode.notification.company.entity.Company;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import com.jmcode.notification.company.entity.Company;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**

@@ -3,27 +3,13 @@ package com.jmcode.notification.whatsapp.service;
 import com.jmcode.notification.whatsapp.client.GowaClient;
 import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import com.jmcode.notification.config.NotificationProperties;
-import com.jmcode.notification.whatsapp.client.GowaClient;
-import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import com.jmcode.notification.email.service.PasswordEncryptor;
-import com.jmcode.notification.whatsapp.client.GowaClient;
-import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import org.springframework.stereotype.Service;
-import com.jmcode.notification.whatsapp.client.GowaClient;
-import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import org.springframework.util.StringUtils;
-import com.jmcode.notification.whatsapp.client.GowaClient;
-import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import org.springframework.web.client.RestClient;
 
-import com.jmcode.notification.whatsapp.client.GowaClient;
-import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import java.time.Instant;
-import com.jmcode.notification.whatsapp.client.GowaClient;
-import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import java.util.Map;
-import com.jmcode.notification.whatsapp.client.GowaClient;
-import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

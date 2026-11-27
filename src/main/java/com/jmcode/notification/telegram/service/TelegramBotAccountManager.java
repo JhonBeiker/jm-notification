@@ -3,27 +3,13 @@ package com.jmcode.notification.telegram.service;
 import com.jmcode.notification.telegram.client.TelegramBotClient;
 import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import com.jmcode.notification.config.NotificationProperties;
-import com.jmcode.notification.telegram.client.TelegramBotClient;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
-import com.jmcode.notification.telegram.client.TelegramBotClient;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.boot.http.client.HttpClientSettings;
-import com.jmcode.notification.telegram.client.TelegramBotClient;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.stereotype.Service;
-import com.jmcode.notification.telegram.client.TelegramBotClient;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.web.client.RestClient;
 
-import com.jmcode.notification.telegram.client.TelegramBotClient;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import java.time.Instant;
-import com.jmcode.notification.telegram.client.TelegramBotClient;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import java.util.Map;
-import com.jmcode.notification.telegram.client.TelegramBotClient;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

@@ -7,118 +7,23 @@ import com.jmcode.notification.common.exception.NotificationSendException;
 import com.jmcode.notification.common.exception.SubscriberNotFoundException;
 import com.jmcode.notification.common.exception.UpstreamServiceException;
 import com.jmcode.notification.dispatch.dto.NotificationResponseDto;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import jakarta.persistence.EntityNotFoundException;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import jakarta.servlet.http.HttpServletRequest;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import jakarta.validation.ConstraintViolationException;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import org.slf4j.Logger;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import org.slf4j.LoggerFactory;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import org.springframework.dao.DataIntegrityViolationException;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import org.springframework.http.HttpStatus;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import org.springframework.http.ResponseEntity;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import org.springframework.security.access.AccessDeniedException;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import org.springframework.validation.FieldError;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import java.util.LinkedHashMap;
-import com.jmcode.notification.common.exception.ChannelNotFoundException;
-import com.jmcode.notification.common.exception.ConflictException;
-import com.jmcode.notification.common.exception.InvalidCredentialsException;
-import com.jmcode.notification.common.exception.NotificationSendException;
-import com.jmcode.notification.common.exception.SubscriberNotFoundException;
-import com.jmcode.notification.common.exception.UpstreamServiceException;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -193,6 +98,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        String message = "Invalid value for parameter '" + ex.getName() + "'";
+        return build(HttpStatus.BAD_REQUEST, "Bad Request", message, request);
     }
 
     @ExceptionHandler(IllegalStateException.class)
