@@ -2,16 +2,11 @@ package com.jmcode.notification.telegram.service;
 
 import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import com.jmcode.notification.company.service.CompanyScope;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import lombok.RequiredArgsConstructor;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.stereotype.Service;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.util.StringUtils;
 
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import java.util.LinkedHashMap;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import java.util.Map;
 
 @Service

@@ -2,14 +2,10 @@ package com.jmcode.notification.telegram.repository;
 
 import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.data.jpa.repository.Query;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import org.springframework.stereotype.Repository;
 
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import java.util.List;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import java.util.Optional;
 
 @Repository

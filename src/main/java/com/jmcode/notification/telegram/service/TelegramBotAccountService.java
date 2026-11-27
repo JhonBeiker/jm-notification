@@ -3,30 +3,14 @@ package com.jmcode.notification.telegram.service;
 import com.jmcode.notification.telegram.entity.TelegramBotAccount;
 import com.jmcode.notification.telegram.repository.TelegramBotAccountRepository;
 import com.jmcode.notification.company.service.CompanyScope;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
-import com.jmcode.notification.telegram.repository.TelegramBotAccountRepository;
 import jakarta.persistence.EntityNotFoundException;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
-import com.jmcode.notification.telegram.repository.TelegramBotAccountRepository;
 import lombok.RequiredArgsConstructor;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
-import com.jmcode.notification.telegram.repository.TelegramBotAccountRepository;
 import org.springframework.security.access.AccessDeniedException;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
-import com.jmcode.notification.telegram.repository.TelegramBotAccountRepository;
 import org.springframework.stereotype.Service;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
-import com.jmcode.notification.telegram.repository.TelegramBotAccountRepository;
 import org.springframework.transaction.annotation.Transactional;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
-import com.jmcode.notification.telegram.repository.TelegramBotAccountRepository;
 import org.springframework.util.StringUtils;
 
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
-import com.jmcode.notification.telegram.repository.TelegramBotAccountRepository;
 import java.util.List;
-import com.jmcode.notification.telegram.entity.TelegramBotAccount;
-import com.jmcode.notification.telegram.repository.TelegramBotAccountRepository;
 import java.util.Optional;
 
 @Service

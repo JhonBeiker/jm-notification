@@ -3,33 +3,15 @@ package com.jmcode.notification.security.filter;
 import com.jmcode.notification.security.model.Role;
 import com.jmcode.notification.security.service.JwtService;
 import jakarta.servlet.FilterChain;
-import com.jmcode.notification.security.model.Role;
-import com.jmcode.notification.security.service.JwtService;
 import jakarta.servlet.ServletException;
-import com.jmcode.notification.security.model.Role;
-import com.jmcode.notification.security.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
-import com.jmcode.notification.security.model.Role;
-import com.jmcode.notification.security.service.JwtService;
 import jakarta.servlet.http.HttpServletResponse;
-import com.jmcode.notification.security.model.Role;
-import com.jmcode.notification.security.service.JwtService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import com.jmcode.notification.security.model.Role;
-import com.jmcode.notification.security.service.JwtService;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import com.jmcode.notification.security.model.Role;
-import com.jmcode.notification.security.service.JwtService;
 import org.springframework.security.core.context.SecurityContextHolder;
-import com.jmcode.notification.security.model.Role;
-import com.jmcode.notification.security.service.JwtService;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.jmcode.notification.security.model.Role;
-import com.jmcode.notification.security.service.JwtService;
 import java.io.IOException;
-import com.jmcode.notification.security.model.Role;
-import com.jmcode.notification.security.service.JwtService;
 import java.util.List;
 
 public class JwtAuthFilter extends OncePerRequestFilter {

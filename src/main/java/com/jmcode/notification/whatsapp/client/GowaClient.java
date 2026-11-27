@@ -2,40 +2,23 @@ package com.jmcode.notification.whatsapp.client;
 
 import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import com.jmcode.notification.common.exception.UpstreamServiceException;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import org.slf4j.Logger;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import org.slf4j.LoggerFactory;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import org.springframework.core.ParameterizedTypeReference;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import org.springframework.http.HttpHeaders;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import org.springframework.http.HttpMethod;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import org.springframework.http.MediaType;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import org.springframework.util.StringUtils;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import org.springframework.web.client.ResourceAccessException;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import org.springframework.web.client.RestClient;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import org.springframework.web.client.RestClientResponseException;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import java.net.URI;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import java.nio.charset.StandardCharsets;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import java.util.Base64;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import java.util.LinkedHashMap;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import java.util.List;
-import com.jmcode.notification.whatsapp.service.WhatsAppDeviceManager;
 import java.util.Map;
 
 /**

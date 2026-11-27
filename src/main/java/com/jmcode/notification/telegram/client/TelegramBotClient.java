@@ -2,40 +2,23 @@ package com.jmcode.notification.telegram.client;
 
 import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import com.jmcode.notification.channel.Attachment;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import org.slf4j.Logger;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import org.slf4j.LoggerFactory;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import org.springframework.core.ParameterizedTypeReference;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import org.springframework.core.io.ByteArrayResource;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import org.springframework.http.MediaType;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import org.springframework.util.LinkedMultiValueMap;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import org.springframework.util.MultiValueMap;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import org.springframework.util.StringUtils;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import org.springframework.web.client.ResourceAccessException;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import org.springframework.web.client.RestClient;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import java.net.URI;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import java.util.Base64;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import java.util.LinkedHashMap;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import java.util.List;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import java.util.Map;
-import com.jmcode.notification.telegram.service.TelegramBotAccountManager;
 import java.util.regex.Pattern;
 
 /**

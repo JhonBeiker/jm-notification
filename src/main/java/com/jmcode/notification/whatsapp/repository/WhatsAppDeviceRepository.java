@@ -2,12 +2,9 @@ package com.jmcode.notification.whatsapp.repository;
 
 import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import org.springframework.stereotype.Repository;
 
-import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import java.util.List;
-import com.jmcode.notification.whatsapp.entity.WhatsAppDevice;
 import java.util.Optional;
 
 @Repository

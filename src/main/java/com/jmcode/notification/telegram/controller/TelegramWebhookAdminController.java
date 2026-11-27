@@ -2,34 +2,20 @@ package com.jmcode.notification.telegram.controller;
 
 import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import com.jmcode.notification.telegram.dto.RegisterWebhookRequestDto;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import io.swagger.v3.oas.annotations.Operation;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import lombok.RequiredArgsConstructor;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import org.springframework.http.HttpStatus;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import org.springframework.web.bind.annotation.GetMapping;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import org.springframework.web.bind.annotation.PostMapping;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import org.springframework.web.bind.annotation.RequestBody;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import org.springframework.web.bind.annotation.RequestMapping;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jmcode.notification.telegram.service.TelegramWebhookService;
 import java.util.Map;
 
 @RestController

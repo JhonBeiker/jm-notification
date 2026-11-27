@@ -3,27 +3,13 @@ package com.jmcode.notification.email.service;
 import com.jmcode.notification.email.entity.EmailAccount;
 import com.jmcode.notification.email.repository.EmailAccountRepository;
 import com.jmcode.notification.company.service.CompanyScope;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.repository.EmailAccountRepository;
 import jakarta.persistence.EntityNotFoundException;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.repository.EmailAccountRepository;
 import lombok.RequiredArgsConstructor;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.repository.EmailAccountRepository;
 import org.springframework.security.access.AccessDeniedException;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.repository.EmailAccountRepository;
 import org.springframework.stereotype.Service;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.repository.EmailAccountRepository;
 import org.springframework.transaction.annotation.Transactional;
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.repository.EmailAccountRepository;
 import org.springframework.util.StringUtils;
 
-import com.jmcode.notification.email.entity.EmailAccount;
-import com.jmcode.notification.email.repository.EmailAccountRepository;
 import java.util.List;
 
 @Service

@@ -3,20 +3,10 @@ package com.jmcode.notification.security.config;
 import com.jmcode.notification.security.entity.AdminUser;
 import com.jmcode.notification.security.service.AdminUserService;
 import org.slf4j.Logger;
-import com.jmcode.notification.security.entity.AdminUser;
-import com.jmcode.notification.security.service.AdminUserService;
 import org.slf4j.LoggerFactory;
-import com.jmcode.notification.security.entity.AdminUser;
-import com.jmcode.notification.security.service.AdminUserService;
 import org.springframework.boot.CommandLineRunner;
-import com.jmcode.notification.security.entity.AdminUser;
-import com.jmcode.notification.security.service.AdminUserService;
 import lombok.RequiredArgsConstructor;
-import com.jmcode.notification.security.entity.AdminUser;
-import com.jmcode.notification.security.service.AdminUserService;
 import org.springframework.stereotype.Component;
-import com.jmcode.notification.security.entity.AdminUser;
-import com.jmcode.notification.security.service.AdminUserService;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component

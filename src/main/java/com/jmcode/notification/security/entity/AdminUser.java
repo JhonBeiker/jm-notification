@@ -2,42 +2,24 @@ package com.jmcode.notification.security.entity;
 
 import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.Column;
-import com.jmcode.notification.security.model.Role;
 import com.jmcode.notification.company.entity.Company;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.Entity;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.EnumType;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.FetchType;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.JoinColumn;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.ManyToOne;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.Enumerated;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.GeneratedValue;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.GenerationType;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.Id;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.PrePersist;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.PreUpdate;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.Table;
-import com.jmcode.notification.security.model.Role;
 import jakarta.persistence.UniqueConstraint;
-import com.jmcode.notification.security.model.Role;
 import lombok.Getter;
-import com.jmcode.notification.security.model.Role;
 import lombok.NoArgsConstructor;
-import com.jmcode.notification.security.model.Role;
 import lombok.Setter;
 
-import com.jmcode.notification.security.model.Role;
 import java.time.Instant;
 
 @Entity

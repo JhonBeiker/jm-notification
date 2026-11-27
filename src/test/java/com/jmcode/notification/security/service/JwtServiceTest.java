@@ -5,30 +5,12 @@ import com.jmcode.notification.security.model.AuthPrincipal;
 import com.jmcode.notification.security.model.Role;
 import org.junit.jupiter.api.Test;
 
-import com.jmcode.notification.security.config.AuthProperties;
-import com.jmcode.notification.security.model.AuthPrincipal;
-import com.jmcode.notification.security.model.Role;
 import java.time.Duration;
-import com.jmcode.notification.security.config.AuthProperties;
-import com.jmcode.notification.security.model.AuthPrincipal;
-import com.jmcode.notification.security.model.Role;
 import java.util.Optional;
 
-import com.jmcode.notification.security.config.AuthProperties;
-import com.jmcode.notification.security.model.AuthPrincipal;
-import com.jmcode.notification.security.model.Role;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import com.jmcode.notification.security.config.AuthProperties;
-import com.jmcode.notification.security.model.AuthPrincipal;
-import com.jmcode.notification.security.model.Role;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import com.jmcode.notification.security.config.AuthProperties;
-import com.jmcode.notification.security.model.AuthPrincipal;
-import com.jmcode.notification.security.model.Role;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import com.jmcode.notification.security.config.AuthProperties;
-import com.jmcode.notification.security.model.AuthPrincipal;
-import com.jmcode.notification.security.model.Role;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JwtServiceTest {
