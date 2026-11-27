@@ -27,7 +27,7 @@
 - `common/` — `exception/` (excepciones de dominio/aplicación) y `web/` (`ApiError`, `GlobalExceptionHandler`). Los servicios no dependen de la capa web.
 - `company/` — `controller/`, `dto/`, `entity/` (`Company`), `repository/`, `service/` (`CompanyService`, `CompanyScope`).
 - `config/` — configuración global (plano): `AppConfig`, `NotificationProperties`, `OpenApiConfig`, `StartupConfigurationReport`.
-- `dispatch/` — `controller/` (`NotificationController`, `NotificationAdminController`), `dto/`, `entity/` (`NotificationLog`), `repository/`, `service/` (`NotificationService`, `NotificationLogService`).
+- `dispatch/` — `controller/` (`NotificationController`, `NotificationAdminController`), `dto/`, `entity/` (`NotificationLog`), `repository/`, `service/` (`NotificationService`, `NotificationLogService`, `NotificationQueueService`, `NotificationQueueWorker`).
 - `email/`, `telegram/`, `whatsapp/` — cada canal organizado en `channel/`, `controller/`, `dto/`, `entity/`, `repository/`, `service/` (y `client/` en `telegram` y `whatsapp`).
 - `security/` — `config/` (`SecurityConfig`, `AuthProperties`, `AdminUserSeeder`), `controller/`, `dto/`, `entity/` (`AdminUser`, `ApiClient`), `filter/` (JWT y API key), `model/` (`AuthPrincipal`, `Role`), `repository/`, `service/`.
 - `src/test/java` — los tests unitarios espejan los subpaquetes de `src/main/java`; los tests de integración (`*IntegrationTest`) viven en la raíz de su módulo.
@@ -46,7 +46,8 @@ Canal nuevo: implementa `NotificationChannel`, anótalo `@Component` y añade la
 - Un DTO de request con `boolean` primitivos exige todos los flags en el JSON: Jackson no mapea un valor ausente sobre un primitivo.
 - `SecurityContractIntegrationTest` (MockMvc) fija el contrato HTTP: 401 en credenciales inválidas, endpoints admin autenticados, API key, webhook de Telegram con secret, 400 en canal desconocido.
 - `NotificationAdminIntegrationTest` (MockMvc) fija el historial de notificaciones: paginación, filtros combinables, detalle por ID con aislamiento por empresa, estadísticas agregadas (`/stats`) y validación de parámetros (400).
-- Unitarios sin Spring: `PasswordEncryptorTest`, `JwtServiceTest`, `ApiKeyGeneratorTest`, `EmailTemplateRendererTest`, `NotificationRequestTest`, `NotificationServiceTest`, `TelegramSubscriberServiceTest`, `WhatsAppNotificationChannelTest`, `GowaClientTest`, `WhatsAppDeviceServiceTest`.
+- `NotificationQueueIntegrationTest` (MockMvc, worker deshabilitado para determinismo) fija el encolado (`?async=true`), polling `GET /api/v1/notifications/{id}` por API Key, drenado por el worker y `POST /api/v1/admin/notifications/{id}/retry` (202/403/404/409).
+- Unitarios sin Spring: `PasswordEncryptorTest`, `JwtServiceTest`, `ApiKeyGeneratorTest`, `EmailTemplateRendererTest`, `NotificationRequestTest`, `NotificationServiceTest`, `NotificationQueueServiceTest`, `TelegramSubscriberServiceTest`, `WhatsAppNotificationChannelTest`, `GowaClientTest`, `WhatsAppDeviceServiceTest`.
 - No hay mocks a nivel HTTP de SMTP/Telegram: los canales se prueban por sus gates `isEnabled`/`isConfigured` o con dobles.
 
 ## Superficie REST
@@ -57,9 +58,9 @@ Canal nuevo: implementa `NotificationChannel`, anótalo `@Component` y añade la
 - `GET/POST/PUT/DELETE /api/v1/admin/email-templates[/{id}]` — igual, por empresa. Placeholders `{{variable}}`.
 - `GET/POST/PUT/DELETE /api/v1/admin/telegram-bot-accounts[/{id}]` — igual, por empresa.
 - `GET/POST/PUT/DELETE /api/v1/admin/whatsapp-devices[/{id}]`, `GET /{id}/qr`, `POST /{id}/pair`, `GET /{id}/status`, `POST /{id}/reconnect`, `POST /{id}/logout`, `POST /{id}/unregister` — igual, por empresa (dispositivos GOWA).
-- `GET /api/v1/admin/notifications` (paginado; filtros `companyId`, `channel`, `status`, `recipient`, `clientCode`, `from`, `until`), `GET /api/v1/admin/notifications/{id}` (403 cruzado, 404 si no existe), `GET /api/v1/admin/notifications/stats` (`?companyId=&from=&until=`) — SUPER_ADMIN o ADMIN (acotado a su empresa).
+- `GET /api/v1/admin/notifications` (paginado; filtros `companyId`, `channel`, `status`, `recipient`, `clientCode`, `from`, `until`), `GET /api/v1/admin/notifications/{id}` (403 cruzado, 404 si no existe), `GET /api/v1/admin/notifications/stats` (`?companyId=&from=&until=`), `POST /api/v1/admin/notifications/{id}/retry` (reencola `FAILED` con payload; 403/404/409) — SUPER_ADMIN o ADMIN (acotado a su empresa).
 - `GET/POST /api/v1/admin/api-clients` (`?companyId=` filtra), `POST /{id}/rotate-key` (clave en claro sólo una vez), `DELETE /{id}` (204 sin body) — SUPER_ADMIN o el ADMIN de la empresa, que gestiona sólo las suyas. Toda clave nace con empresa: el ADMIN usa la suya, el SUPER_ADMIN manda `companyId` (si no, 400). El nombre es único por empresa.
-- `POST /api/v1/notifications`, `POST /api/v1/notifications/bulk`, `GET /api/v1/notifications/channels` — requieren `X-Api-Key`.
+- `POST /api/v1/notifications[?async=true]`, `POST /api/v1/notifications/bulk[?async=true]`, `GET /api/v1/notifications/{id}`, `GET /api/v1/notifications/channels` — requieren `X-Api-Key`.
 - `POST /api/v1/telegram/webhook` — público para Telegram, autenticado por el header `X-Telegram-Bot-Api-Secret-Token`.
 - `/api/v1/telegram/webhook-admin` y `/api/v1/telegram/subscribers` — SUPER_ADMIN o ADMIN.
 

@@ -30,7 +30,8 @@ import java.time.Instant;
                 @Index(name = "idx_notification_created_at", columnList = "created_at"),
                 @Index(name = "idx_notification_company_created_at", columnList = "company_id, created_at"),
                 @Index(name = "idx_notification_company_status", columnList = "company_id, status"),
-                @Index(name = "idx_notification_company_channel", columnList = "company_id, channel")
+                @Index(name = "idx_notification_company_channel", columnList = "company_id, channel"),
+                @Index(name = "idx_notification_status_next_attempt", columnList = "status, next_attempt_at")
         }
 )
 @Getter
@@ -75,6 +76,25 @@ public class NotificationLog {
 
     @Column(name = "detail", length = 1000)
     private String detail;
+
+    /**
+     * Payload serializado del {@code NotificationRequest} mientras el envío esté en cola o
+     * fallido (permite reintentos automáticos y manuales). Se limpia al completarse.
+     */
+    @Column(name = "payload_json", columnDefinition = "TEXT")
+    private String payloadJson;
+
+    @Column(name = "attempts", nullable = false)
+    private int attempts = 0;
+
+    @Column(name = "max_attempts", nullable = false)
+    private int maxAttempts = 1;
+
+    @Column(name = "next_attempt_at")
+    private Instant nextAttemptAt;
+
+    @Column(name = "last_attempt_at")
+    private Instant lastAttemptAt;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;

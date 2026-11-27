@@ -18,6 +18,10 @@ public record NotificationLogResponseDto(
         String templateName,
         String providerMessageId,
         String detail,
+        int attempts,
+        int maxAttempts,
+        Instant nextAttemptAt,
+        Instant lastAttemptAt,
         Instant createdAt
 ) {
     public static NotificationLogResponseDto from(NotificationLog log) {
@@ -33,6 +37,10 @@ public record NotificationLogResponseDto(
                 log.getTemplateName(),
                 log.getProviderMessageId(),
                 log.getDetail(),
+                log.getAttempts(),
+                log.getMaxAttempts(),
+                log.getNextAttemptAt(),
+                log.getLastAttemptAt(),
                 log.getCreatedAt()
         );
     }

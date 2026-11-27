@@ -8,6 +8,7 @@ import com.jmcode.notification.dispatch.dto.NotificationLogFilter;
 import com.jmcode.notification.dispatch.dto.NotificationLogResponseDto;
 import com.jmcode.notification.dispatch.dto.NotificationStatsResponseDto;
 import com.jmcode.notification.dispatch.service.NotificationLogService;
+import com.jmcode.notification.dispatch.service.NotificationQueueService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,10 +18,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
@@ -35,6 +39,7 @@ import java.time.Instant;
 public class NotificationAdminController {
 
     private final NotificationLogService notificationLogService;
+    private final NotificationQueueService notificationQueueService;
 
     @GetMapping
     @Operation(summary = "Listar notificaciones paginadas",
@@ -93,5 +98,22 @@ public class NotificationAdminController {
             @RequestParam(required = false) Instant until
     ) {
         return notificationLogService.stats(companyId, from, until);
+    }
+
+    @PostMapping("/{id}/retry")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @Operation(summary = "Reintentar manualmente una notificación fallida",
+            description = "Reencola una notificación en estado FAILED que conserve su payload para un nuevo intento.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "202", description = "Notificación reencolada"),
+            @ApiResponse(responseCode = "403", description = "La notificación pertenece a otra empresa",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))),
+            @ApiResponse(responseCode = "404", description = "Notificación no encontrada",
+                    content = @Content(schema = @Schema(implementation = ApiError.class))),
+            @ApiResponse(responseCode = "409", description = "No está en estado FAILED o no tiene payload almacenado",
+                    content = @Content(schema = @Schema(implementation = ApiError.class)))
+    })
+    public NotificationLogResponseDto retry(@PathVariable Long id) {
+        return NotificationLogResponseDto.from(notificationQueueService.retry(id));
     }
 }

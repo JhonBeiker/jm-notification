@@ -74,3 +74,11 @@ notification:
     upload-read-timeout: ${TELEGRAM_UPLOAD_READ_TIMEOUT:2m}
     welcome-message: ${TELEGRAM_WELCOME_MESSAGE:Suscripcion activa. Ya puedes recibir notificaciones.}
     goodbye-message: ${TELEGRAM_GOODBYE_MESSAGE:Suscripcion cancelada. Usa /start para volver a activarla.}
+  queue:
+    worker-enabled: ${NOTIFICATION_QUEUE_WORKER_ENABLED:true}
+    poll-interval: ${NOTIFICATION_QUEUE_POLL_INTERVAL:5s}
+    batch-size: ${NOTIFICATION_QUEUE_BATCH_SIZE:20}
+    max-attempts: ${NOTIFICATION_QUEUE_MAX_ATTEMPTS:3}
+    initial-backoff: ${NOTIFICATION_QUEUE_INITIAL_BACKOFF:30s}
+    max-backoff: ${NOTIFICATION_QUEUE_MAX_BACKOFF:15m}
+    processing-timeout: ${NOTIFICATION_QUEUE_PROCESSING_TIMEOUT:5m}

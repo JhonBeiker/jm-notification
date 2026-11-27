@@ -25,6 +25,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -50,9 +51,11 @@ public class NotificationLogService {
     private final NotificationLogRepository repository;
     private final CompanyScope companyScope;
     private final EntityManager entityManager;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public NotificationLog record(NotificationRequest request, NotificationResult result) {
+        Instant timestamp = result.timestamp() != null ? result.timestamp() : Instant.now();
         NotificationLog log = new NotificationLog();
         log.setCompany(companyScope.resolveOwner(null));
         log.setChannel(result.channel());
@@ -63,7 +66,13 @@ public class NotificationLogService {
         log.setTemplateName(truncate(request.templateName(), MAX_TEMPLATE_NAME_LENGTH));
         log.setProviderMessageId(truncate(result.providerMessageId(), MAX_PROVIDER_MESSAGE_ID_LENGTH));
         log.setDetail(truncate(result.detail(), MAX_DETAIL_LENGTH));
-        log.setCreatedAt(result.timestamp() != null ? result.timestamp() : Instant.now());
+        log.setAttempts(1);
+        log.setMaxAttempts(1);
+        log.setLastAttemptAt(timestamp);
+        log.setCreatedAt(timestamp);
+        if (result.status() == NotificationStatus.FAILED) {
+            log.setPayloadJson(objectMapper.writeValueAsString(request));
+        }
         return repository.save(log);
     }
 
