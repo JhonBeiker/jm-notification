@@ -53,6 +53,13 @@ cp .env.example .env   # o copia manual en Windows
 | `TELEGRAM_REQUIRE_ACTIVE_SUBSCRIBER` | Solo enviar a suscriptores `/start` (fallback) | `true` |
 | `TELEGRAM_WELCOME_MESSAGE` | Mensaje tras `/start` (fallback) | (ver `.env.example`) |
 | `TELEGRAM_GOODBYE_MESSAGE` | Mensaje tras `/stop` (fallback) | (ver `.env.example`) |
+| `NOTIFICATION_QUEUE_WORKER_ENABLED` | Habilitar worker de cola asíncrona | `true` |
+| `NOTIFICATION_QUEUE_POLL_INTERVAL` | Intervalo de consulta de la cola | `5s` |
+| `NOTIFICATION_QUEUE_BATCH_SIZE` | Máximo de envíos reclamados por ciclo | `20` |
+| `NOTIFICATION_QUEUE_MAX_ATTEMPTS` | Intentos máximos por notificación encolada | `3` |
+| `NOTIFICATION_QUEUE_INITIAL_BACKOFF` | Espera inicial tras un fallo | `30s` |
+| `NOTIFICATION_QUEUE_MAX_BACKOFF` | Tope del backoff exponencial | `15m` |
+| `NOTIFICATION_QUEUE_PROCESSING_TIMEOUT` | Tiempo tras el cual un `PROCESSING` atascado vuelve a `QUEUED` | `5m` |
 
 > **Nota:** `TELEGRAM_BOT_TOKEN` ya no se usa desde `.env`. Los bots se gestionan en **Base de Datos** vía `/api/v1/admin/telegram-bot-accounts`. Las variables `TELEGRAM_*` son fallback global para compatibilidad.
 
@@ -515,6 +522,15 @@ Los adjuntos se envían como **base64** en el JSON. Canales soportados:
 
 `POST /api/v1/notifications/bulk`
 
+### Envío asíncrono, cola y reintentos
+
+Añade `?async=true` a `POST /api/v1/notifications` o `POST /api/v1/notifications/bulk` para encolar el envío en base de datos en lugar de esperar al proveedor:
+
+- Devuelve `202 Accepted` con `id` y `status: "QUEUED"`.
+- La app cliente puede consultar el estado y los intentos con `GET /api/v1/notifications/{id}` (acotado a la empresa de la API Key).
+- Un worker programado (`NotificationQueueWorker`) procesa la cola con **backoff exponencial** (`initialBackoff * 2^(intento-1)` hasta `maxBackoff`) y recupera automáticamente trabajos atascados en `PROCESSING` si el servicio se reinicia.
+- Los errores de acceso entre empresas (`AccessDeniedException`) fallan sin reintentos; los fallos de proveedor reintentan hasta `maxAttempts` y conservan el payload para reintento manual.
+
 ### Canales
 
 `GET /api/v1/notifications/channels`
@@ -527,7 +543,8 @@ Todos los envíos se registran en la tabla `notifications` y pueden consultarse 
 |---|---|---|
 | `GET` | `/api/v1/admin/notifications` | Listado paginado (más recientes primero) con filtros combinables |
 | `GET` | `/api/v1/admin/notifications/{id}` | Detalle de una notificación (`403` si es de otra empresa, `404` si no existe) |
-| `GET` | `/api/v1/admin/notifications/stats` | Totales agregados por estado (`SENT`, `FAILED`, `SKIPPED`) y canal (`EMAIL`, `WHATSAPP`, `TELEGRAM`) |
+| `GET` | `/api/v1/admin/notifications/stats` | Totales agregados por estado (`QUEUED`, `PROCESSING`, `SENT`, `FAILED`, `SKIPPED`) y canal (`EMAIL`, `WHATSAPP`, `TELEGRAM`) |
+| `POST` | `/api/v1/admin/notifications/{id}/retry` | Reencola una notificación en estado `FAILED` que conserve su payload (`202`, `403`, `404`, `409`) |
 
 Filtros disponibles en `GET /api/v1/admin/notifications`:
 - `companyId` (sólo `SUPER_ADMIN`)

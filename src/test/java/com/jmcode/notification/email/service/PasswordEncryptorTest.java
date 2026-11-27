@@ -21,7 +21,8 @@ class PasswordEncryptorTest {
                 new NotificationProperties.Email(true, "", key),
                 new NotificationProperties.WhatsApp(false, "", "", ""),
                 new NotificationProperties.Telegram(false, "", "", true, "", "", "", false,
-                        Duration.ofMinutes(2), Duration.ofSeconds(10)));
+                        Duration.ofMinutes(2), Duration.ofSeconds(10)),
+                null);
         return new PasswordEncryptor(properties);
     }
 

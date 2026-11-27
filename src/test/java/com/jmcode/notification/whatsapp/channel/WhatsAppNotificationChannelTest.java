@@ -55,7 +55,8 @@ class WhatsAppNotificationChannelTest {
                 new NotificationProperties.Email(true, "", ""),
                 new NotificationProperties.WhatsApp(enabled, "http://gowa.local", "admin", "secret"),
                 new NotificationProperties.Telegram(false, "", "", true, "", "", "", false,
-                        Duration.ofMinutes(2), Duration.ofSeconds(10)));
+                        Duration.ofMinutes(2), Duration.ofSeconds(10)),
+                null);
         return new WhatsAppNotificationChannel(deviceService, deviceManager, properties);
     }
 

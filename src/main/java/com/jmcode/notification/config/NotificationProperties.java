@@ -9,7 +9,8 @@ import java.time.Duration;
 public record NotificationProperties(
         @DefaultValue Email email,
         @DefaultValue WhatsApp whatsapp,
-        @DefaultValue Telegram telegram
+        @DefaultValue Telegram telegram,
+        @DefaultValue Queue queue
 ) {
 
     public record Email(
@@ -51,6 +52,20 @@ public record NotificationProperties(
              */
             @DefaultValue("2m") Duration uploadReadTimeout,
             @DefaultValue("10s") Duration uploadConnectTimeout
+    ) {
+    }
+
+    /**
+     * Cola persistente en BD para envíos asíncronos y reintentos con backoff exponencial.
+     */
+    public record Queue(
+            @DefaultValue("true") boolean workerEnabled,
+            @DefaultValue("5s") Duration pollInterval,
+            @DefaultValue("20") int batchSize,
+            @DefaultValue("3") int maxAttempts,
+            @DefaultValue("30s") Duration initialBackoff,
+            @DefaultValue("15m") Duration maxBackoff,
+            @DefaultValue("5m") Duration processingTimeout
     ) {
     }
 }

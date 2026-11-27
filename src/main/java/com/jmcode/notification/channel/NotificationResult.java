@@ -10,6 +10,10 @@ public record NotificationResult(
         String detail,
         Instant timestamp
 ) {
+    public static NotificationResult queued(ChannelType channel, String to) {
+        return new NotificationResult(channel, NotificationStatus.QUEUED, to, null, "Queued for delivery", Instant.now());
+    }
+
     public static NotificationResult sent(ChannelType channel, String to, String providerMessageId) {
         return new NotificationResult(channel, NotificationStatus.SENT, to, providerMessageId, "OK", Instant.now());
     }

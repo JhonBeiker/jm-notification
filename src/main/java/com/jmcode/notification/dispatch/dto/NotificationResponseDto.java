@@ -7,6 +7,7 @@ import com.jmcode.notification.channel.NotificationStatus;
 import java.time.Instant;
 
 public record NotificationResponseDto(
+        Long id,
         ChannelType channel,
         NotificationStatus status,
         String to,
@@ -15,7 +16,12 @@ public record NotificationResponseDto(
         Instant timestamp
 ) {
     public static NotificationResponseDto from(NotificationResult result) {
+        return from(result, null);
+    }
+
+    public static NotificationResponseDto from(NotificationResult result, Long id) {
         return new NotificationResponseDto(
+                id,
                 result.channel(),
                 result.status(),
                 result.to(),

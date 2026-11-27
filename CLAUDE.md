@@ -43,8 +43,9 @@ com.jmcode.notification
 ├── common/       ApiError, GlobalExceptionHandler, shared exceptions
 ├── company/      Company + CompanyScope (tenant of everything below), admin controller, dto
 ├── config/       NotificationProperties, OpenApiConfig, StartupConfigurationReport
-├── dispatch/     NotificationService, NotificationLogService, NotificationLog,
-│                 NotificationController, NotificationAdminController, dto
+├── dispatch/     NotificationService, NotificationLogService, NotificationQueueService,
+│                 NotificationQueueWorker, NotificationLog, NotificationController,
+│                 NotificationAdminController, dto
 ├── email/        EmailAccount*, EmailTemplate*, EmailNotificationChannel,
 │                 PasswordEncryptor, admin controllers, dto
 ├── telegram/     bot accounts, subscribers, webhook, bot client, channel, dto
@@ -182,11 +183,11 @@ Spring Boot 4.1 uses **Jackson 3** (`tools.jackson.*`) for the application `Obje
 ## Tests
 
 `JmNotificationApplicationTests` boots the full context against in-memory H2.
-`SecurityContractIntegrationTest`, `CompanyScopeIntegrationTest` and `NotificationAdminIntegrationTest` are MockMvc tests over the same
+`SecurityContractIntegrationTest`, `CompanyScopeIntegrationTest`, `NotificationAdminIntegrationTest` and `NotificationQueueIntegrationTest` are MockMvc tests over the same
 H2 context — `CompanyScopeIntegrationTest` pins the tenant contract (a company admin only sees its own rows, 403 across
-companies, 409 deleting a company that still has data), and `NotificationAdminIntegrationTest` covers notification history pagination, filters, detail by id, and `/stats`. Their seed data is `static` because JUnit
+companies, 409 deleting a company that still has data), `NotificationAdminIntegrationTest` covers notification history pagination, filters, detail by id, and `/stats`, and `NotificationQueueIntegrationTest` covers `?async=true`, polling, worker draining, and admin `/retry`. Their seed data is `static` because JUnit
 builds one instance per test while the database is shared.
 Request DTOs with primitive `boolean` components need every flag present in the JSON: Jackson refuses
-to map an absent value onto a primitive. The rest are plain unit tests with no Spring context: `PasswordEncryptorTest`, `JwtServiceTest`, `ApiKeyGeneratorTest`, `EmailTemplateRendererTest`, `NotificationRequestTest`, `NotificationServiceTest` (anonymous `NotificationChannel`), `TelegramSubscriberServiceTest` (Mockito), `WhatsAppNotificationChannelTest`, `GowaClientTest`, `WhatsAppDeviceServiceTest`.
+to map an absent value onto a primitive. The rest are plain unit tests with no Spring context: `PasswordEncryptorTest`, `JwtServiceTest`, `ApiKeyGeneratorTest`, `EmailTemplateRendererTest`, `NotificationRequestTest`, `NotificationServiceTest` (anonymous `NotificationChannel`), `NotificationQueueServiceTest`, `TelegramSubscriberServiceTest` (Mockito), `WhatsAppNotificationChannelTest`, `GowaClientTest`, `WhatsAppDeviceServiceTest`.
 
 Constructing a `NotificationRequestDto` requires all nine record components, so adding a field there breaks every existing test call site.
