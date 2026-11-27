@@ -138,6 +138,9 @@ plantillas **sin enviar `companyId`**: se asigna sola la suya.
 | GET/POST/PUT/DELETE | `/api/v1/admin/email-accounts[/{id}]` | SUPER_ADMIN o el ADMIN de la empresa |
 | GET/POST/PUT/DELETE | `/api/v1/admin/email-templates[/{id}]` | SUPER_ADMIN o el ADMIN de la empresa |
 | GET/POST/PUT/DELETE | `/api/v1/admin/telegram-bot-accounts[/{id}]` | SUPER_ADMIN o el ADMIN de la empresa |
+| GET/POST/PUT/DELETE | `/api/v1/admin/whatsapp-devices[/{id}]` | SUPER_ADMIN o el ADMIN de la empresa |
+| GET/POST/DELETE | `/api/v1/admin/api-clients[/{id}]` | SUPER_ADMIN o el ADMIN de la empresa |
+| GET | `/api/v1/admin/notifications[/{id}\|/stats]` | SUPER_ADMIN o el ADMIN de la empresa |
 
 > `isDefault` marca la cuenta o el bot que se usa cuando el envío no trae `clientCode`: es global,
 > así que sólo lo puede marcar un SUPER_ADMIN.
@@ -516,6 +519,27 @@ Los adjuntos se envían como **base64** en el JSON. Canales soportados:
 
 `GET /api/v1/notifications/channels`
 
+### Historial y estadísticas de notificaciones (JWT admin)
+
+Todos los envíos se registran en la tabla `notifications` y pueden consultarse con JWT de administrador (`SUPER_ADMIN` ve todas y puede filtrar con `companyId`; el `ADMIN` de una empresa sólo ve las de la suya).
+
+| Método | Ruta | Qué hace |
+|---|---|---|
+| `GET` | `/api/v1/admin/notifications` | Listado paginado (más recientes primero) con filtros combinables |
+| `GET` | `/api/v1/admin/notifications/{id}` | Detalle de una notificación (`403` si es de otra empresa, `404` si no existe) |
+| `GET` | `/api/v1/admin/notifications/stats` | Totales agregados por estado (`SENT`, `FAILED`, `SKIPPED`) y canal (`EMAIL`, `WHATSAPP`, `TELEGRAM`) |
+
+Filtros disponibles en `GET /api/v1/admin/notifications`:
+- `companyId` (sólo `SUPER_ADMIN`)
+- `channel` (`EMAIL`, `WHATSAPP`, `TELEGRAM`)
+- `status` (`SENT`, `FAILED`, `SKIPPED`)
+- `recipient` (búsqueda parcial *case-insensitive*)
+- `clientCode` (coincidencia exacta *case-insensitive*)
+- `from` / `until` (rango ISO-8601 inclusivo, p. ej. `2026-01-01T00:00:00Z`)
+- `page` (default `0`), `size` (default `20`, máximo `100`)
+
+`GET /api/v1/admin/notifications/stats` acepta los filtros opcionales `companyId`, `from` y `until`.
+
 ### Health
 
 `GET /actuator/health`
@@ -524,12 +548,15 @@ Los adjuntos se envían como **base64** en el JSON. Canales soportados:
 
 ```
 com.jmcode.notification
-├── channel/     # Email / WhatsApp / Telegram
-├── config/
-├── domain/
-├── service/
-├── telegram/    # Suscriptores, webhook payload, bot client, bot accounts
-└── web/
+├── channel/     # SPI NotificationChannel y modelo compartido (ChannelType, Request/Result/Status, Attachment)
+├── common/      # Excepciones de dominio y GlobalExceptionHandler / ApiError / PageResponseDto
+├── company/     # Empresas (Company), CompanyScope y CRUD admin
+├── config/      # Propiedades globales, OpenAPI y reporte de arranque
+├── dispatch/    # Envío (NotificationService), historial (NotificationLogService) y controladores
+├── email/       # Cuentas SMTP, plantillas, cifrado AES-GCM y canal Email
+├── security/    # Auth JWT y API Keys, AdminUser, ApiClient y SecurityConfig
+├── telegram/    # Cuentas de bot, suscriptores, webhook, cliente HTTP y canal Telegram
+└── whatsapp/    # Dispositivos GOWA, cliente HTTP, emparejamiento y canal WhatsApp
 ```
 
 Datos locales H2: carpeta `./data/` (consola en `/h2-console`).
